@@ -69,10 +69,27 @@ test('기술 스택은 기술 이름을 대체 텍스트로 가진 shields.io �
   await expect(badge).toHaveAttribute('src', /^https:\/\/img\.shields\.io\/badge\/TypeScript-/);
 });
 
-test('취미 섹션에 취미가 모두 보인다', async ({page}) => {
+test('취미 섹션에 취미가 모두 보이고 온라인 게임은 없다', async ({page}) => {
   await page.goto('/');
   const section = page.locator('#interests');
   for (const i of profile.interests) await expect(section.getByText(i.name, {exact: true})).toBeVisible();
+  await expect(section.getByText('온라인 게임')).toHaveCount(0);
+});
+
+test('취미 사진은 처음에 볼링이고 버튼을 누르면 바뀐다', async ({page}) => {
+  await page.goto('/');
+  const section = page.locator('#interests');
+  const bowling = section.getByRole('button', {name: '볼링'});
+  const gym = section.getByRole('button', {name: '헬스'});
+  await expect(bowling).toHaveAttribute('aria-pressed', 'true');
+  await expect(section.getByRole('img', {name: /볼링/})).toBeVisible();
+  await expect(section.getByRole('img', {name: /헬스/})).toBeHidden();
+
+  await gym.click();
+  await expect(gym).toHaveAttribute('aria-pressed', 'true');
+  await expect(bowling).toHaveAttribute('aria-pressed', 'false');
+  await expect(section.getByRole('img', {name: /헬스/})).toBeVisible();
+  await expect(section.getByRole('img', {name: /볼링/})).toBeHidden();
 });
 
 test('큰 화면에서 처음 열거나 소개를 누르면 소개가 현재 위치다', async ({page}) => {

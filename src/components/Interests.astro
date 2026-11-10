@@ -1,13 +1,25 @@
 ---
+import {Image} from 'astro:assets';
+
+import bowling from '../assets/interests/bowling.webp';
+import gym from '../assets/interests/gym.jpg';
+import whisky from '../assets/interests/whisky.jpg';
 import {profile} from '../data/profile.ts';
+
+// position은 4:3으로 잘랐을 때 사람과 잔이 가운데 오도록 맞춘 값이다.
+const photos = {
+  bowling: {src: bowling, alt: '볼링장에서 공을 던지는 모습', position: '50% 68%'},
+  gym: {src: gym, alt: '헬스장에서 찍은 사진', position: '50% 80%'},
+  whisky: {src: whisky, alt: '위스키 숙성고에서 잔을 들고 있는 모습', position: '50% 70%'}
+};
 ---
 
 <section id="interests" class="section" aria-labelledby="interests-title">
   <h2 id="interests-title">취미</h2>
-  <ul class="grid">
+  <div class="tabs" role="group" aria-label="취미 사진 고르기">
     {
-      profile.interests.map((i) => (
-        <li>
+      profile.interests.map((i, index) => (
+        <button type="button" class="tab" data-key={i.icon} aria-pressed={index === 0 ? 'true' : 'false'} aria-controls="interest-photo">
           <span class="icon" aria-hidden="true">
             <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
               {i.icon === 'bowling' && (
@@ -18,11 +30,7 @@ import {profile} from '../data/profile.ts';
                   <circle cx="12" cy="11.6" r="1.1" />
                 </>
               )}
-              {i.icon === 'gym' && (
-                <>
-                  <path d="M6.5 7v10M17.5 7v10M3.5 9.5v5M20.5 9.5v5M6.5 12h11" />
-                </>
-              )}
+              {i.icon === 'gym' && <path d="M6.5 7v10M17.5 7v10M3.5 9.5v5M20.5 9.5v5M6.5 12h11" />}
               {i.icon === 'whisky' && (
                 <>
                   <path d="M5 5h14l-1.4 13.3a2 2 0 0 1-2 1.7H8.4a2 2 0 0 1-2-1.7L5 5z" />
@@ -30,64 +38,119 @@ import {profile} from '../data/profile.ts';
                   <path d="M9.5 8.2l2.6-.8.8 2.6-2.6.8z" />
                 </>
               )}
-              {i.icon === 'game' && (
-                <>
-                  <path d="M7.5 8h9a4.5 4.5 0 0 1 4.5 4.5v1.8a2.7 2.7 0 0 1-4.9 1.6L14.6 14H9.4l-1.5 1.9A2.7 2.7 0 0 1 3 14.3v-1.8A4.5 4.5 0 0 1 7.5 8z" />
-                  <path d="M7.5 10.5v3M6 12h3" />
-                  <circle cx="15.5" cy="11" r=".6" />
-                  <circle cx="17.2" cy="12.7" r=".6" />
-                </>
-              )}
             </svg>
           </span>
           <span class="name">{i.name}</span>
-        </li>
+        </button>
       ))
     }
-  </ul>
+  </div>
+  <figure id="interest-photo" class="photo">
+    {
+      profile.interests.map((i, index) => (
+        <Image
+          src={photos[i.icon].src}
+          alt={photos[i.icon].alt}
+          data-key={i.icon}
+          hidden={index !== 0}
+          widths={[480, 720, 1440]}
+          sizes="(min-width: 1024px) 720px, calc(100vw - 2.5rem)"
+          style={`object-position: ${photos[i.icon].position}`}
+        />
+      ))
+    }
+  </figure>
 </section>
 
+<script>
+  // 누른 버튼의 사진만 보이게 한다. 스크립트가 없으면 첫 사진(볼링)만 보인다.
+  const root = document.getElementById('interests');
+  const buttons = [...(root?.querySelectorAll<HTMLButtonElement>('button[data-key]') ?? [])];
+  const images = [...(root?.querySelectorAll<HTMLImageElement>('img[data-key]') ?? [])];
+
+  for (const button of buttons) {
+    button.addEventListener('click', () => {
+      for (const b of buttons) b.setAttribute('aria-pressed', String(b === button));
+      for (const img of images) img.hidden = img.dataset.key !== button.dataset.key;
+    });
+  }
+</script>
+
 <style>
-  .grid {
-    list-style: none;
+  .tabs {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 0.75rem;
   }
 
-  li {
+  .tab {
     display: flex;
-    align-items: center;
-    gap: 0.875rem;
-    padding: 1rem 1.125rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.625rem;
+    padding: 0.875rem 1rem;
     border: 1px solid var(--rule);
     border-radius: 12px;
+    background: var(--bg);
+    color: var(--ink);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .tab:hover {
+    border-color: var(--accent);
+  }
+
+  /* 고른 버튼은 바탕을 메뉴 색으로 채워 색 말고도 모양으로 구분된다 */
+  .tab[aria-pressed='true'] {
+    border-color: var(--side);
+    background: var(--side);
+    color: var(--side-ink);
   }
 
   .icon {
     display: grid;
     place-items: center;
-    flex: none;
-    width: 2.75rem;
-    height: 2.75rem;
+    width: 2.5rem;
+    height: 2.5rem;
     border-radius: 50%;
     background: var(--side);
     color: var(--side-accent);
+  }
+
+  .tab[aria-pressed='true'] .icon {
+    background: rgb(255 255 255 / 0.12);
   }
 
   .name {
     font-weight: 600;
   }
 
-  @media (min-width: 640px) {
-    .grid {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-    }
+  .photo {
+    margin: 1rem 0 0;
+  }
 
-    li {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 0.75rem;
+  .photo img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    border-radius: 12px;
+    background: var(--tint);
+  }
+
+  .photo img[hidden] {
+    display: none;
+  }
+
+  @media (min-width: 640px) {
+    .tab {
+      flex-direction: row;
+      align-items: center;
+      gap: 0.875rem;
+      padding: 1rem 1.125rem;
     }
   }
 </style>
