@@ -1,6 +1,8 @@
 ---
 import type {CollectionEntry} from 'astro:content';
 
+import Diagram from './Diagram.astro';
+import TechChips from './TechChips.astro';
 import {formatPeriod} from '../lib/period.ts';
 
 type Props = {project: CollectionEntry<'projects'>};
@@ -16,10 +18,11 @@ const {title, start, end, role, summary, highlights, stack} = project.data;
   </div>
   <p class="muted role">{role}</p>
   <p class="summary">{summary}</p>
+  <Diagram id={project.id} />
   <ul class="bullets highlights">
     {highlights.map((h) => <li>{h}</li>)}
   </ul>
-  <p class="muted stack">{stack.join(', ')}</p>
+  <div class="stack"><TechChips items={stack} small label={`${title} 기술`} /></div>
 </article>
 
 <style>
@@ -48,11 +51,10 @@ const {title, start, end, role, summary, highlights, stack} = project.data;
   }
 
   .highlights {
-    margin-top: 0.5rem;
+    margin-top: 0.875rem;
   }
 
   .stack {
-    margin-top: 0.625rem;
-    font-size: 0.875rem;
+    margin-top: 0.75rem;
   }
 </style>

@@ -1,8 +1,12 @@
 ---
+import {Image} from 'astro:assets';
+
+import photo from '../assets/profile.webp';
 import {profile} from '../data/profile.ts';
 ---
 
 <section id="about" class="section about" aria-labelledby="about-title">
+  <Image class="photo" src={photo} alt={`${profile.name} 프로필 사진`} widths={[96, 192]} sizes="96px" />
   <h1 id="about-title">{profile.name}</h1>
   <p class="headline">{profile.headline}</p>
   <ul class="links">
@@ -19,6 +23,25 @@ import {profile} from '../data/profile.ts';
 <style>
   .about {
     padding-top: 5rem;
+  }
+
+  /* 데스크톱은 메뉴에 사진이 있어서 모바일에서만 보인다 */
+  .photo {
+    display: block;
+    width: 96px;
+    height: 96px;
+    object-fit: cover;
+    object-position: 50% 18%;
+    border-radius: 50%;
+    /* 증명사진 배경이 흰색이라 테두리로 원을 드러낸다 */
+    box-shadow: 0 0 0 1px var(--rule);
+    margin-bottom: 1.5rem;
+  }
+
+  @media (min-width: 1024px) {
+    .photo {
+      display: none;
+    }
   }
 
   h1 {

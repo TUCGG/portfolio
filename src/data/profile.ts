@@ -19,6 +19,7 @@ export type Profile = {
   pinnedPosts: {title: string; url: string}[];
   education: {school: string; major: string; start: string; end?: string; status: string}[];
   certificates: {name: string; issuer: string; date: string}[];
+  interests: {name: string; icon: 'bowling' | 'gym' | 'whisky' | 'game'}[];
 };
 
 // 경력과 연락처는 이 파일에서만 고친다.
@@ -69,5 +70,11 @@ export const profile: Profile = {
     }
   ],
   education: [],
-  certificates: []
+  certificates: [],
+  interests: [
+    {name: '볼링', icon: 'bowling'},
+    {name: '헬스', icon: 'gym'},
+    {name: '위스키', icon: 'whisky'},
+    {name: '온라인 게임', icon: 'game'}
+  ]
 };

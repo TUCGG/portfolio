@@ -1,0 +1,98 @@
+---
+// 프로젝트 id와 같은 이름의 SVG(src/assets/diagrams/<id>.svg)를 inline으로 넣는다.
+// inline이라 페이지 글꼴과 색 변수를 그대로 쓴다. 대체 텍스트는 SVG의 aria-label에 있다.
+type SvgModule = {default: (props: Record<string, unknown>) => unknown};
+
+type Props = {id: string};
+
+const files = import.meta.glob<SvgModule>('../assets/diagrams/*.svg', {eager: true});
+const Svg = files[`../assets/diagrams/${Astro.props.id}.svg`]?.default;
+---
+
+{
+  Svg && (
+    <figure class="diagram">
+      <div class="scroll" tabindex="0" role="region" aria-label="구조도">
+        <Svg />
+      </div>
+    </figure>
+  )
+}
+
+<style>
+  .diagram {
+    margin: 1rem 0 0;
+    border: 1px solid var(--rule);
+    border-radius: 10px;
+    background: linear-gradient(var(--tint), var(--tint)) padding-box;
+  }
+
+  /* 좁은 화면에서는 글자가 너무 작아지지 않게 그림만 가로로 스크롤한다 */
+  .scroll {
+    overflow-x: auto;
+    border-radius: 10px;
+  }
+
+  .scroll :global(svg) {
+    display: block;
+    width: 100%;
+    min-width: 560px;
+    height: auto;
+  }
+
+  .diagram :global(.node) {
+    fill: var(--bg);
+    stroke: var(--rule);
+    stroke-width: 1.5;
+  }
+
+  .diagram :global(.node.accent) {
+    fill: var(--side);
+    stroke: var(--side);
+  }
+
+  .diagram :global(.step) {
+    fill: var(--bg);
+    stroke: var(--accent);
+    stroke-width: 1.25;
+  }
+
+  .diagram :global(.label) {
+    fill: var(--ink);
+    font-size: 15px;
+    font-weight: 650;
+  }
+
+  .diagram :global(.accent-text) {
+    fill: var(--side-ink);
+  }
+
+  .diagram :global(.sub) {
+    fill: var(--muted);
+    font-size: 12.5px;
+  }
+
+  .diagram :global(.accent-sub) {
+    fill: var(--side-muted);
+  }
+
+  .diagram :global(.cap) {
+    fill: var(--muted);
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .diagram :global(.edge) {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 1.5;
+  }
+
+  .diagram :global(.edge.dashed) {
+    stroke-dasharray: 4 4;
+  }
+
+  .diagram :global(.head) {
+    fill: var(--accent);
+  }
+</style>

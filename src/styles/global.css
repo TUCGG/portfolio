@@ -1,10 +1,15 @@
 :root {
-  --ink: #16202a;
-  --muted: #5b6672;
-  --accent: #0e6b57;
+  /* 다크 그린 테마. 글자색은 모두 배경 대비 4.5:1 이상 */
+  --ink: #14211b;
+  --muted: #536159;
+  --accent: #1b6b4e;
   --bg: #ffffff;
-  --side: #f4f6f5;
-  --rule: #dde3e0;
+  --tint: #edf4f0;
+  --rule: #dbe4df;
+  --side: #0f3328;
+  --side-ink: #eef5f1;
+  --side-muted: #a8c3b6;
+  --side-accent: #7fd3a8;
 
   --side-width: 240px;
   --measure: 720px;
@@ -22,8 +27,9 @@ html {
   -webkit-text-size-adjust: 100%;
 }
 
+/* 첫 로딩의 해시 이동은 즉시 하고(이미지가 늦게 로딩되면 목표를 지나치지 못한다), 그 뒤 메뉴 이동만 부드럽게 한다 */
 @media (prefers-reduced-motion: no-preference) {
-  html {
+  html.loaded {
     scroll-behavior: smooth;
   }
 }

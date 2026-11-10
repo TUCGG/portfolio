@@ -1,0 +1,47 @@
+---
+import {fetchBadgeSize, techBadge} from '../lib/tech.ts';
+
+type Props = {items: string[]; small?: boolean; label?: string};
+
+const {items, small = false, label} = Astro.props;
+const height = small ? 22 : 28;
+const badges = await Promise.all(
+  items.map(async (name) => {
+    const src = techBadge(name);
+    const size = await fetchBadgeSize(src);
+    // 배지 원본 높이(28px)에 맞춰 화면 높이로 줄인 폭. 이미지가 늦게 와도 자리가 먼저 잡힌다.
+    const width = size ? Math.round((size.width * height) / size.height) : undefined;
+    return {name, src, width};
+  })
+);
+---
+
+<ul class:list={['badges', {small}]} aria-label={label}>
+  {
+    badges.map((b) => (
+      <li>
+        <img src={b.src} alt={b.name} width={b.width} height={height} loading="lazy" decoding="async" />
+      </li>
+    ))
+  }
+</ul>
+
+<style>
+  .badges {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+  }
+
+  img {
+    display: block;
+    width: auto;
+    height: 28px;
+    border-radius: 4px;
+  }
+
+  .small img {
+    height: 22px;
+  }
+</style>

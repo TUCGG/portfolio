@@ -44,6 +44,15 @@ test('mergePosts: recent가 비면 pinned만 남는다', () => {
   assert.deepEqual(mergePosts(pinned, []), {pinned, recent: []});
 });
 
+test('mergePosts: 대표 글을 뺀 뒤 최근 글을 limit개로 자른다', () => {
+  const pinned = [1, 2, 3].map((i) => ({title: `P${i}`, url: `u${i}`}));
+  const recent = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => ({title: `R${i}`, url: `u${i}`, publishedAt: new Date(2026, 0, i)}));
+  assert.deepEqual(
+    mergePosts(pinned, recent, 5).recent.map((p) => p.url),
+    ['u4', 'u5', 'u6', 'u7', 'u8']
+  );
+});
+
 test('mergePosts: pinned와 같은 URL은 recent에서 뺀다', () => {
   const pinned = [{title: 'A', url: 'https://velog.io/@lsh7315/a'}];
   const recent = [

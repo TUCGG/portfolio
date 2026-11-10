@@ -1,4 +1,7 @@
 ---
+import {Image} from 'astro:assets';
+
+import photo from '../assets/profile.webp';
 import {profile} from '../data/profile.ts';
 
 type Props = {sections: {id: string; label: string}[]};
@@ -8,6 +11,14 @@ const {sections} = Astro.props;
 
 <header class="sidebar">
   <div class="id">
+    <Image
+      class="photo"
+      src={photo}
+      alt={`${profile.name} 프로필 사진`}
+      widths={[128, 256]}
+      sizes="128px"
+      loading="eager"
+    />
     <a class="name" href="#about">{profile.name}</a>
     <p class="headline">{profile.headline}</p>
   </div>
@@ -22,43 +33,74 @@ const {sections} = Astro.props;
       }
     </ul>
   </nav>
+  <a class="pdf" href="/resume.pdf">PDF 다운로드</a>
 </header>
 
 <script>
-  // 화면 가운데 띠에 들어온 섹션의 메뉴 링크를 현재 위치로 표시한다.
+  // 윗부분이 화면 40% 선을 지난 마지막 섹션을 현재 위치로 표시한다.
+  // 이미지가 늦게 로딩되어 레이아웃이 밀려도 맞도록 매번 위치를 다시 잰다.
   const links = [...document.querySelectorAll<HTMLAnchorElement>('nav[aria-label="섹션"] a')];
-  const linkById = new Map(links.map((a) => [a.hash.slice(1), a]));
+  const sections = links
+    .map((a) => document.getElementById(a.hash.slice(1)))
+    .filter((s): s is HTMLElement => s !== null);
+  // 메뉴를 누른 뒤에는 사용자가 직접 스크롤하기 전까지 누른 항목을 유지한다.
+  let pinned: string | null = null;
 
   const setCurrent = (id: string) => {
     for (const a of links) {
-      if (a === linkById.get(id)) a.setAttribute('aria-current', 'true');
+      if (a.hash === `#${id}`) a.setAttribute('aria-current', 'true');
       else a.removeAttribute('aria-current');
     }
   };
 
-  const observer = new IntersectionObserver(
-    (entries) => {
-      for (const entry of entries) if (entry.isIntersecting) setCurrent(entry.target.id);
-    },
-    {rootMargin: '-40% 0px -55% 0px'}
-  );
+  const update = () => {
+    if (pinned) return setCurrent(pinned);
+    const line = innerHeight * 0.4;
+    // 마지막 섹션이 짧으면 40% 선에 닿지 못하므로 페이지 끝에서는 직접 고른다.
+    const atBottom = innerHeight + scrollY >= document.documentElement.scrollHeight - 2;
+    const target =
+      scrollY < 1
+        ? sections[0]
+        : atBottom
+          ? sections.at(-1)
+          : (sections.findLast((s) => s.getBoundingClientRect().top <= line) ?? sections[0]);
+    if (target) setCurrent(target.id);
+  };
 
-  for (const id of linkById.keys()) {
-    const section = document.getElementById(id);
-    if (section) observer.observe(section);
+  // 스크롤 없이 레이아웃만 바뀌는 경우(이미지 로딩 등)에도 다시 계산한다.
+  const observer = new IntersectionObserver(update, {threshold: [0, 0.25, 0.5, 0.75, 1]});
+  for (const s of sections) observer.observe(s);
+  addEventListener('load', update);
+  addEventListener('resize', update);
+
+  // 메뉴를 눌러 생긴 스크롤이 멈춘 뒤(150ms) 다시 스크롤이 시작되면 고정을 푼다.
+  // 스크롤바를 끌거나 키보드로 움직여도 같은 방식으로 풀린다.
+  let clickScrolling = false;
+  let settle: number | undefined;
+  const waitForSettle = () => {
+    clearTimeout(settle);
+    settle = window.setTimeout(() => (clickScrolling = false), 150);
+  };
+
+  for (const a of links) {
+    a.addEventListener('click', () => {
+      pinned = a.hash.slice(1);
+      clickScrolling = true;
+      waitForSettle();
+      setCurrent(pinned);
+    });
   }
 
-  // 마지막 섹션이 짧으면 가운데 띠에 닿지 않으므로 페이지 끝에서 직접 표시한다.
   addEventListener(
     'scroll',
     () => {
-      const atBottom = innerHeight + scrollY >= document.documentElement.scrollHeight - 2;
-      if (atBottom && links.length) setCurrent(links[links.length - 1].hash.slice(1));
+      if (clickScrolling) waitForSettle();
+      else pinned = null;
+      update();
     },
     {passive: true}
   );
-
-  for (const a of links) a.addEventListener('click', () => setCurrent(a.hash.slice(1)));
+  addEventListener('hashchange', update);
 </script>
 
 <style>
@@ -67,21 +109,27 @@ const {sections} = Astro.props;
     top: 0;
     z-index: 5;
     background: var(--side);
-    border-bottom: 1px solid var(--rule);
+    color: var(--side-ink);
+  }
+
+  .sidebar :focus-visible {
+    outline-color: var(--side-accent);
   }
 
   .id {
     padding: 0.875rem 1rem 0;
   }
 
-  .name {
-    color: var(--ink);
-    font-weight: 700;
-    text-decoration: none;
+  .photo,
+  .headline,
+  .pdf {
+    display: none;
   }
 
-  .headline {
-    display: none;
+  .name {
+    color: var(--side-ink);
+    font-weight: 700;
+    text-decoration: none;
   }
 
   ul {
@@ -89,14 +137,15 @@ const {sections} = Astro.props;
     display: flex;
     gap: 0.25rem;
     overflow-x: auto;
-    padding: 0 0.5rem;
+    /* overflow가 위아래도 잘라서 포커스 표시가 보이도록 여백을 둔다 */
+    padding: 0.25rem 0.5rem;
     scrollbar-width: none;
   }
 
   nav a {
     display: block;
-    padding: 0.625rem 0.5rem;
-    color: var(--muted);
+    padding: 0.5rem;
+    color: var(--side-muted);
     font-size: 0.9375rem;
     text-decoration: none;
     white-space: nowrap;
@@ -104,23 +153,23 @@ const {sections} = Astro.props;
   }
 
   nav a:hover {
-    color: var(--ink);
+    color: var(--side-ink);
   }
 
   nav a[aria-current='true'] {
-    color: var(--ink);
+    color: var(--side-ink);
     font-weight: 600;
-    border-color: var(--accent);
+    border-color: var(--side-accent);
   }
 
   @media (min-width: 1024px) {
     .sidebar {
       position: fixed;
       inset: 0 auto 0 0;
+      display: flex;
+      flex-direction: column;
       width: var(--side-width);
-      padding: 3rem 1.75rem;
-      border-bottom: 0;
-      border-right: 1px solid var(--rule);
+      padding: 2.75rem 1.75rem 2rem;
       overflow-y: auto;
     }
 
@@ -128,15 +177,26 @@ const {sections} = Astro.props;
       padding: 0;
     }
 
+    .photo {
+      display: block;
+      width: 112px;
+      height: 112px;
+      object-fit: cover;
+      object-position: 50% 18%;
+      border-radius: 50%;
+      border: 3px solid rgb(255 255 255 / 0.14);
+      margin-bottom: 1.25rem;
+    }
+
     .name {
-      font-size: 1.25rem;
+      font-size: 1.375rem;
       letter-spacing: -0.02em;
     }
 
     .headline {
       display: block;
       margin-top: 0.5rem;
-      color: var(--muted);
+      color: var(--side-muted);
       font-size: 0.875rem;
       line-height: 1.6;
     }
@@ -144,7 +204,7 @@ const {sections} = Astro.props;
     ul {
       display: grid;
       gap: 0.125rem;
-      margin-top: 2.5rem;
+      margin-top: 2.25rem;
       padding: 0;
       overflow: visible;
     }
@@ -153,6 +213,24 @@ const {sections} = Astro.props;
       padding: 0.375rem 0 0.375rem 0.875rem;
       border-bottom: 0;
       border-left: 2px solid transparent;
+    }
+
+    .pdf {
+      display: inline-block;
+      align-self: flex-start;
+      margin-top: auto;
+      padding: 0.375rem 0.875rem;
+      border: 1px solid var(--side-muted);
+      border-radius: 6px;
+      color: var(--side-ink);
+      font-size: 0.875rem;
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .pdf:hover {
+      border-color: var(--side-accent);
+      color: var(--side-accent);
     }
   }
 </style>

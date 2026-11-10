@@ -1,4 +1,5 @@
 ---
+import TechChips from './TechChips.astro';
 import {profile} from '../data/profile.ts';
 ---
 
@@ -9,7 +10,9 @@ import {profile} from '../data/profile.ts';
       profile.skills.map((s) => (
         <div class="row">
           <dt>{s.group}</dt>
-          <dd>{s.items.join(', ')}</dd>
+          <dd>
+            <TechChips items={s.items} />
+          </dd>
         </div>
       ))
     }
@@ -19,8 +22,8 @@ import {profile} from '../data/profile.ts';
 <style>
   .row {
     display: grid;
-    gap: 0.25rem 1.5rem;
-    padding-block: 0.875rem;
+    gap: 0.5rem 1.5rem;
+    padding-block: 1rem;
     border-top: 1px solid var(--rule);
   }
 
@@ -31,6 +34,7 @@ import {profile} from '../data/profile.ts';
   dt {
     color: var(--muted);
     font-weight: 600;
+    padding-top: 0.1875rem;
   }
 
   @media (min-width: 640px) {

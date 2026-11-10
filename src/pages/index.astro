@@ -6,6 +6,7 @@ import About from '../components/About.astro';
 import Career from '../components/Career.astro';
 import Contact from '../components/Contact.astro';
 import Education from '../components/Education.astro';
+import Interests from '../components/Interests.astro';
 import Posts from '../components/Posts.astro';
 import Projects from '../components/Projects.astro';
 import Sidebar from '../components/Sidebar.astro';
@@ -15,7 +16,8 @@ import {sortProjects} from '../lib/projects.ts';
 import {fetchVelogPosts, mergePosts} from '../lib/velog.ts';
 
 const projects = sortProjects(await getCollection('projects'));
-const posts = mergePosts(profile.pinnedPosts, await fetchVelogPosts(profile.velogHandle));
+// 대표 글이 최근 글과 겹쳐도 최근 글이 5개 남도록 넉넉히 가져온다.
+const posts = mergePosts(profile.pinnedPosts, await fetchVelogPosts(profile.velogHandle, 5 + profile.pinnedPosts.length));
 const personal = projects.filter((p) => p.data.company === '개인');
 const hasEducation = profile.education.length > 0 || profile.certificates.length > 0;
 
@@ -25,6 +27,7 @@ const sections = [
   ...(personal.length > 0 ? [{id: 'projects', label: '프로젝트'}] : []),
   {id: 'posts', label: '기술 글'},
   {id: 'skills', label: '기술 스택'},
+  {id: 'interests', label: '취미'},
   ...(hasEducation ? [{id: 'education', label: '학력·자격'}] : []),
   {id: 'contact', label: '연락처'}
 ];
@@ -38,6 +41,7 @@ const sections = [
     {personal.length > 0 && <Projects projects={personal} />}
     <Posts pinned={posts.pinned} recent={posts.recent} />
     <Skills />
+    <Interests />
     <Education />
     <Contact />
   </main>

@@ -6,6 +6,12 @@ test('/print는 검색 제외 표시가 있다', async ({page}) => {
   await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'noindex');
 });
 
+test('/resume.pdf의 메일과 프로젝트 주소는 누를 수 있는 링크다', async ({request}) => {
+  const pdf = (await (await request.get('/resume.pdf')).body()).toString('latin1');
+  expect(pdf).toMatch(/\/URI\s*\(mailto:/);
+  expect(pdf).toMatch(/\/URI\s*\(https:\/\/tucgg\.github\.io\/projects\//);
+});
+
 test('/resume.pdf는 1~2페이지이고 Pretendard 글꼴이 들어 있다', async ({request}) => {
   const res = await request.get('/resume.pdf');
   expect(res.status()).toBe(200);

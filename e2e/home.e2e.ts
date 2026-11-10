@@ -54,6 +54,70 @@ test('기술 글 섹션에 대표 글이 보인다', async ({page}) => {
   }
 });
 
+test('프로필 사진이 데스크톱과 모바일에서 보인다', async ({page}) => {
+  const photo = page.getByRole('img', {name: `${profile.name} 프로필 사진`});
+  await page.setViewportSize({width: 1280, height: 900});
+  await page.goto('/');
+  await expect(photo).toBeVisible();
+  await page.setViewportSize({width: 375, height: 812});
+  await expect(photo).toBeVisible();
+});
+
+test('기술 스택은 기술 이름을 대체 텍스트로 가진 shields.io 배지다', async ({page}) => {
+  await page.goto('/');
+  const badge = page.locator('#skills').getByRole('img', {name: 'TypeScript', exact: true});
+  await expect(badge).toHaveAttribute('src', /^https:\/\/img\.shields\.io\/badge\/TypeScript-/);
+});
+
+test('취미 섹션에 취미가 모두 보인다', async ({page}) => {
+  await page.goto('/');
+  const section = page.locator('#interests');
+  for (const i of profile.interests) await expect(section.getByText(i.name, {exact: true})).toBeVisible();
+});
+
+test('큰 화면에서 처음 열거나 소개를 누르면 소개가 현재 위치다', async ({page}) => {
+  await page.setViewportSize({width: 1280, height: 1300});
+  await page.goto('/');
+  const nav = page.getByRole('navigation', {name: '섹션'});
+  const about = nav.getByRole('link', {name: '소개'});
+  await expect(about).toHaveAttribute('aria-current', 'true');
+  await nav.getByRole('link', {name: '경력'}).click();
+  await about.click();
+  await page.waitForTimeout(1000); // 부드러운 스크롤이 끝난 뒤에도 유지되는지 본다
+  await expect(about).toHaveAttribute('aria-current', 'true');
+});
+
+test('메뉴를 누른 뒤 스크롤바 등으로 직접 내리면 현재 위치가 따라간다', async ({page}) => {
+  await page.setViewportSize({width: 1280, height: 900});
+  await page.goto('/');
+  const nav = page.getByRole('navigation', {name: '섹션'});
+  await nav.getByRole('link', {name: '경력'}).click();
+  await page.waitForTimeout(1000);
+  // 휠 이벤트 없이 스크롤 위치만 바꾼다(스크롤바 끌기와 같다).
+  await page.evaluate(() => window.scrollTo({top: document.getElementById('posts')!.offsetTop, behavior: 'instant'}));
+  await expect(nav.getByRole('link', {name: '기술 글'})).toHaveAttribute('aria-current', 'true');
+});
+
+test('모바일에서 #contact로 열면 연락처가 현재 위치다', async ({page}) => {
+  await page.setViewportSize({width: 375, height: 812});
+  await page.goto('/#contact');
+  // 배지 이미지가 모두 로딩되어 레이아웃이 자리 잡은 뒤에도 유지되는지 본다.
+  await page.waitForLoadState('networkidle');
+  await page.waitForTimeout(300);
+  const nav = page.getByRole('navigation', {name: '섹션'});
+  await expect(nav.getByRole('link', {name: '연락처'})).toHaveAttribute('aria-current', 'true');
+});
+
+test('모바일 메뉴 링크의 포커스 표시가 잘리지 않을 여백이 있다', async ({page}) => {
+  await page.setViewportSize({width: 375, height: 812});
+  await page.goto('/');
+  const nav = page.getByRole('navigation', {name: '섹션'});
+  const list = (await nav.locator('ul').boundingBox())!;
+  const link = (await nav.getByRole('link', {name: '경력'}).boundingBox())!;
+  expect(link.y - list.y).toBeGreaterThanOrEqual(4);
+  expect(list.y + list.height - (link.y + link.height)).toBeGreaterThanOrEqual(4);
+});
+
 test('없는 주소는 404 페이지를 보여준다', async ({page}) => {
   const res = await page.goto('/no-such-page');
   expect(res?.status()).toBe(404);

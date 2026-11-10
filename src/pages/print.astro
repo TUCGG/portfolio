@@ -1,7 +1,9 @@
 ---
+import {Image} from 'astro:assets';
 import {getCollection} from 'astro:content';
 
 import BaseLayout from '../layouts/BaseLayout.astro';
+import photo from '../assets/profile.webp';
 import {profile} from '../data/profile.ts';
 import {formatPeriod} from '../lib/period.ts';
 import {sortProjects} from '../lib/projects.ts';
@@ -9,21 +11,25 @@ import {sortProjects} from '../lib/projects.ts';
 const projects = sortProjects(await getCollection('projects'));
 const personal = projects.filter((p) => p.data.company === '개인');
 const host = (url: string) => url.replace(/^https?:\/\//, '');
-const detailUrl = (id: string) => `${host(profile.siteUrl)}/projects/${id}/`;
+const detailUrl = (id: string) => `${profile.siteUrl}/projects/${id}/`;
 const {education, certificates} = profile;
 ---
 
 <BaseLayout title={`${profile.name} 이력서`} description={profile.headline} noindex>
   <main id="main" class="sheet">
     <header class="head">
-      <h1>{profile.name}</h1>
-      <p class="headline">{profile.headline}</p>
-      <ul class="contact">
-        <li>{profile.email}</li>
-        <li>{host(profile.siteUrl)}</li>
-        <li>{host(profile.github)}</li>
-        <li>{host(profile.velog)}</li>
-      </ul>
+      <div>
+        <h1>{profile.name}</h1>
+        <p class="headline">{profile.headline}</p>
+        <ul class="contact">
+          <li><a href={`mailto:${profile.email}`}>{profile.email}</a></li>
+          <li><a href={profile.siteUrl}>{host(profile.siteUrl)}</a></li>
+          <li><a href={profile.github}>{host(profile.github)}</a></li>
+          <li><a href={profile.velog}>{host(profile.velog)}</a></li>
+        </ul>
+        <p class="hobby">취미: {profile.interests.map((i) => i.name).join(', ')}</p>
+      </div>
+      <Image class="photo" src={photo} alt={`${profile.name} 프로필 사진`} widths={[240]} sizes="24mm" loading="eager" />
     </header>
 
     <section>
@@ -64,7 +70,7 @@ const {education, certificates} = profile;
                       <li>{h}</li>
                     ))}
                   </ul>
-                  <p class="link">{detailUrl(p.id)}</p>
+                  <p class="link"><a href={detailUrl(p.id)}>{host(detailUrl(p.id))}</a></p>
                 </div>
               ))}
           </div>
@@ -90,7 +96,7 @@ const {education, certificates} = profile;
                   <li>{h}</li>
                 ))}
               </ul>
-              <p class="link">{detailUrl(p.id)}</p>
+              <p class="link"><a href={detailUrl(p.id)}>{host(detailUrl(p.id))}</a></p>
             </div>
           ))}
         </section>
@@ -154,7 +160,7 @@ const {education, certificates} = profile;
     margin: 0 auto;
     padding: 12mm 0;
     font-size: 10pt;
-    line-height: 1.55;
+    line-height: 1.5;
   }
 
   @media print {
@@ -176,6 +182,31 @@ const {education, certificates} = profile;
     font-weight: 500;
   }
 
+  .sheet .head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 6mm;
+  }
+
+  .sheet .photo {
+    width: 24mm;
+    height: 30mm;
+    object-fit: cover;
+    object-position: 50% 15%;
+    border-radius: 1.5mm;
+  }
+
+  .sheet a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .sheet .hobby {
+    margin-top: 1mm;
+    color: var(--muted);
+  }
+
   .sheet .contact {
     list-style: none;
     display: flex;
@@ -186,7 +217,7 @@ const {education, certificates} = profile;
   }
 
   .sheet section {
-    margin-top: 6mm;
+    margin-top: 4.5mm;
     break-inside: auto;
   }
 
@@ -243,7 +274,7 @@ const {education, certificates} = profile;
   }
 
   .sheet .project {
-    margin-top: 3.5mm;
+    margin-top: 3mm;
     padding-left: 4mm;
     border-left: 1px solid var(--rule);
     break-inside: avoid;

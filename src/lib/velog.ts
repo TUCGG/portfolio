@@ -45,8 +45,8 @@ export async function fetchVelogPosts(handle: string, limit = 5): Promise<Post[]
   }
 }
 
-/** 최근 글에서 대표 글과 같은 주소를 뺀다. */
-export function mergePosts(pinned: PinnedPost[], recent: Post[]): {pinned: PinnedPost[]; recent: Post[]} {
+/** 최근 글에서 대표 글과 같은 주소를 뺀 뒤 limit개로 자른다. */
+export function mergePosts(pinned: PinnedPost[], recent: Post[], limit = 5): {pinned: PinnedPost[]; recent: Post[]} {
   const pinnedUrls = new Set(pinned.map((p) => p.url));
-  return {pinned, recent: recent.filter((p) => !pinnedUrls.has(p.url))};
+  return {pinned, recent: recent.filter((p) => !pinnedUrls.has(p.url)).slice(0, limit)};
 }

@@ -3,6 +3,8 @@ import {Image} from 'astro:assets';
 import {getCollection, render, type CollectionEntry} from 'astro:content';
 
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import Diagram from '../../components/Diagram.astro';
+import TechChips from '../../components/TechChips.astro';
 import {profile} from '../../data/profile.ts';
 import {formatPeriod} from '../../lib/period.ts';
 
@@ -36,7 +38,7 @@ const linkRows = [
       <div><dt>회사</dt><dd>{company}</dd></div>
       <div><dt>기간</dt><dd><time>{formatPeriod(start, end)}</time></dd></div>
       <div><dt>역할</dt><dd>{role}</dd></div>
-      <div><dt>기술</dt><dd>{stack.join(', ')}</dd></div>
+      <div><dt>기술</dt><dd><TechChips items={stack} small /></dd></div>
       {
         linkRows.length > 0 && (
           <div>
@@ -50,6 +52,7 @@ const linkRows = [
         )
       }
     </dl>
+    <Diagram id={entry.id} />
     {cover && <Image class="cover" src={cover} alt={coverAlt ?? ''} widths={[720, 1440]} sizes="(min-width: 760px) 720px, 100vw" />}
     <div class="prose">
       <Content />
@@ -145,6 +148,11 @@ const linkRows = [
   .prose :global(ul),
   .prose :global(ol) {
     padding-left: 1.25rem;
+  }
+
+  .prose :global(img) {
+    max-width: 100%;
+    height: auto;
   }
 
   .back {

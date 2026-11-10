@@ -25,5 +25,8 @@ const ogImage = new URL('/og.png', Astro.site);
   <body>
     <a class="skip" href="#main">본문으로 건너뛰기</a>
     <slot />
+    <script>
+      addEventListener('load', () => document.documentElement.classList.add('loaded'));
+    </script>
   </body>
 </html>
