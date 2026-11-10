@@ -1,0 +1,68 @@
+---
+import {profile} from '../data/profile.ts';
+---
+
+<section id="about" class="section about" aria-labelledby="about-title">
+  <h1 id="about-title">{profile.name}</h1>
+  <p class="headline">{profile.headline}</p>
+  <ul class="links">
+    <li><a href={`mailto:${profile.email}`}>메일</a></li>
+    <li><a href={profile.github}>GitHub</a></li>
+    <li><a href={profile.velog}>velog</a></li>
+    <li><a class="pdf" href="/resume.pdf">PDF 다운로드</a></li>
+  </ul>
+  <div class="intro">
+    {profile.about.map((p) => <p>{p}</p>)}
+  </div>
+</section>
+
+<style>
+  .about {
+    padding-top: 5rem;
+  }
+
+  h1 {
+    font-size: clamp(2.75rem, 7vw, 4rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+  }
+
+  .headline {
+    margin-top: 1rem;
+    font-size: 1.25rem;
+    font-weight: 500;
+    line-height: 1.5;
+    max-width: 30em;
+  }
+
+  .links {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1.25rem;
+    margin-top: 1.5rem;
+  }
+
+  .pdf {
+    display: inline-block;
+    padding: 0.25rem 0.875rem;
+    border: 1px solid var(--accent);
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+  }
+
+  .pdf:hover {
+    background: var(--accent);
+    color: var(--bg);
+  }
+
+  .intro {
+    display: grid;
+    gap: 0.75rem;
+    margin-top: 2.5rem;
+    max-width: 38em;
+  }
+</style>

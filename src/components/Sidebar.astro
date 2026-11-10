@@ -1,0 +1,158 @@
+---
+import {profile} from '../data/profile.ts';
+
+type Props = {sections: {id: string; label: string}[]};
+
+const {sections} = Astro.props;
+---
+
+<header class="sidebar">
+  <div class="id">
+    <a class="name" href="#about">{profile.name}</a>
+    <p class="headline">{profile.headline}</p>
+  </div>
+  <nav aria-label="섹션">
+    <ul>
+      {
+        sections.map((s) => (
+          <li>
+            <a href={`#${s.id}`}>{s.label}</a>
+          </li>
+        ))
+      }
+    </ul>
+  </nav>
+</header>
+
+<script>
+  // 화면 가운데 띠에 들어온 섹션의 메뉴 링크를 현재 위치로 표시한다.
+  const links = [...document.querySelectorAll<HTMLAnchorElement>('nav[aria-label="섹션"] a')];
+  const linkById = new Map(links.map((a) => [a.hash.slice(1), a]));
+
+  const setCurrent = (id: string) => {
+    for (const a of links) {
+      if (a === linkById.get(id)) a.setAttribute('aria-current', 'true');
+      else a.removeAttribute('aria-current');
+    }
+  };
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) if (entry.isIntersecting) setCurrent(entry.target.id);
+    },
+    {rootMargin: '-40% 0px -55% 0px'}
+  );
+
+  for (const id of linkById.keys()) {
+    const section = document.getElementById(id);
+    if (section) observer.observe(section);
+  }
+
+  // 마지막 섹션이 짧으면 가운데 띠에 닿지 않으므로 페이지 끝에서 직접 표시한다.
+  addEventListener(
+    'scroll',
+    () => {
+      const atBottom = innerHeight + scrollY >= document.documentElement.scrollHeight - 2;
+      if (atBottom && links.length) setCurrent(links[links.length - 1].hash.slice(1));
+    },
+    {passive: true}
+  );
+
+  for (const a of links) a.addEventListener('click', () => setCurrent(a.hash.slice(1)));
+</script>
+
+<style>
+  .sidebar {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: var(--side);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .id {
+    padding: 0.875rem 1rem 0;
+  }
+
+  .name {
+    color: var(--ink);
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .headline {
+    display: none;
+  }
+
+  ul {
+    list-style: none;
+    display: flex;
+    gap: 0.25rem;
+    overflow-x: auto;
+    padding: 0 0.5rem;
+    scrollbar-width: none;
+  }
+
+  nav a {
+    display: block;
+    padding: 0.625rem 0.5rem;
+    color: var(--muted);
+    font-size: 0.9375rem;
+    text-decoration: none;
+    white-space: nowrap;
+    border-bottom: 2px solid transparent;
+  }
+
+  nav a:hover {
+    color: var(--ink);
+  }
+
+  nav a[aria-current='true'] {
+    color: var(--ink);
+    font-weight: 600;
+    border-color: var(--accent);
+  }
+
+  @media (min-width: 1024px) {
+    .sidebar {
+      position: fixed;
+      inset: 0 auto 0 0;
+      width: var(--side-width);
+      padding: 3rem 1.75rem;
+      border-bottom: 0;
+      border-right: 1px solid var(--rule);
+      overflow-y: auto;
+    }
+
+    .id {
+      padding: 0;
+    }
+
+    .name {
+      font-size: 1.25rem;
+      letter-spacing: -0.02em;
+    }
+
+    .headline {
+      display: block;
+      margin-top: 0.5rem;
+      color: var(--muted);
+      font-size: 0.875rem;
+      line-height: 1.6;
+    }
+
+    ul {
+      display: grid;
+      gap: 0.125rem;
+      margin-top: 2.5rem;
+      padding: 0;
+      overflow: visible;
+    }
+
+    nav a {
+      padding: 0.375rem 0 0.375rem 0.875rem;
+      border-bottom: 0;
+      border-left: 2px solid transparent;
+    }
+  }
+</style>

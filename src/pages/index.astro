@@ -1,0 +1,50 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import About from '../components/About.astro';
+import Career from '../components/Career.astro';
+import Contact from '../components/Contact.astro';
+import Education from '../components/Education.astro';
+import Sidebar from '../components/Sidebar.astro';
+import Skills from '../components/Skills.astro';
+import {profile} from '../data/profile.ts';
+
+const hasEducation = profile.education.length > 0 || profile.certificates.length > 0;
+
+const sections = [
+  {id: 'about', label: '소개'},
+  {id: 'career', label: '경력'},
+  {id: 'skills', label: '기술 스택'},
+  ...(hasEducation ? [{id: 'education', label: '학력·자격'}] : []),
+  {id: 'contact', label: '연락처'}
+];
+---
+
+<BaseLayout title={`${profile.name} 포트폴리오`} description={profile.headline}>
+  <Sidebar sections={sections} />
+  <main id="main">
+    <About />
+    <Career />
+    <Skills />
+    <Education />
+    <Contact />
+  </main>
+</BaseLayout>
+
+<style>
+  main {
+    max-width: calc(var(--measure) + 2.5rem);
+    padding-inline: 1.25rem;
+  }
+
+  @media (min-width: 1024px) {
+    main {
+      max-width: none;
+      margin-left: var(--side-width);
+      padding-inline: 4rem;
+    }
+
+    main > :global(*) {
+      max-width: var(--measure);
+    }
+  }
+</style>

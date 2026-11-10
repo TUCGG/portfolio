@@ -1,0 +1,41 @@
+---
+import {profile} from '../data/profile.ts';
+---
+
+<section id="skills" class="section" aria-labelledby="skills-title">
+  <h2 id="skills-title">기술 스택</h2>
+  <dl>
+    {
+      profile.skills.map((s) => (
+        <div class="row">
+          <dt>{s.group}</dt>
+          <dd>{s.items.join(', ')}</dd>
+        </div>
+      ))
+    }
+  </dl>
+</section>
+
+<style>
+  .row {
+    display: grid;
+    gap: 0.25rem 1.5rem;
+    padding-block: 0.875rem;
+    border-top: 1px solid var(--rule);
+  }
+
+  .row:last-child {
+    border-bottom: 1px solid var(--rule);
+  }
+
+  dt {
+    color: var(--muted);
+    font-weight: 600;
+  }
+
+  @media (min-width: 640px) {
+    .row {
+      grid-template-columns: 8rem 1fr;
+    }
+  }
+</style>

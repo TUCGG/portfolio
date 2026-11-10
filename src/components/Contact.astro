@@ -1,0 +1,50 @@
+---
+import {profile} from '../data/profile.ts';
+
+const rows = [
+  {label: '메일', href: `mailto:${profile.email}`, text: profile.email},
+  {label: 'GitHub', href: profile.github, text: profile.github.replace('https://', '')},
+  {label: 'velog', href: profile.velog, text: profile.velog.replace('https://', '')}
+];
+---
+
+<section id="contact" class="section" aria-labelledby="contact-title">
+  <h2 id="contact-title">연락처</h2>
+  <p>채용 관련 문의는 메일로 보내 주세요.</p>
+  <dl>
+    {
+      rows.map((r) => (
+        <div class="row">
+          <dt>{r.label}</dt>
+          <dd>
+            <a href={r.href}>{r.text}</a>
+          </dd>
+        </div>
+      ))
+    }
+  </dl>
+  <p class="foot muted">© {new Date().getFullYear()} {profile.name}</p>
+</section>
+
+<style>
+  dl {
+    display: grid;
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: 5rem 1fr;
+    gap: 1rem;
+  }
+
+  dt {
+    color: var(--muted);
+  }
+
+  .foot {
+    margin-top: 4.5rem;
+    font-size: 0.875rem;
+  }
+</style>

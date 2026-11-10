@@ -1,0 +1,42 @@
+---
+import {profile} from '../data/profile.ts';
+import {formatPeriod} from '../lib/period.ts';
+---
+
+<section id="career" class="section" aria-labelledby="career-title">
+  <h2 id="career-title">경력</h2>
+  {
+    profile.career.map((c) => (
+      <div class="company">
+        <div class="entry-head">
+          <h3>{c.company}</h3>
+          <time>{formatPeriod(c.start, c.end)}</time>
+        </div>
+        <p class="muted">
+          {c.team}, {c.role}
+        </p>
+        <ul class="bullets achievements">
+          {c.achievements.map((a) => (
+            <li>{a}</li>
+          ))}
+        </ul>
+      </div>
+    ))
+  }
+</section>
+
+<style>
+  .company + .company {
+    margin-top: 3rem;
+  }
+
+  h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  .achievements {
+    margin-top: 1rem;
+  }
+</style>

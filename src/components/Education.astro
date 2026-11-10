@@ -1,0 +1,59 @@
+---
+import {profile} from '../data/profile.ts';
+import {formatPeriod} from '../lib/period.ts';
+
+const {education, certificates} = profile;
+---
+
+{
+  (education.length > 0 || certificates.length > 0) && (
+    <section id="education" class="section" aria-labelledby="education-title">
+      <h2 id="education-title">학력·자격</h2>
+      {education.length > 0 && (
+        <ul class="list">
+          {education.map((e) => (
+            <li>
+              <div class="entry-head">
+                <h3>{e.school}</h3>
+                <time>{formatPeriod(e.start, e.end)}</time>
+              </div>
+              <p class="muted">
+                {e.major}, {e.status}
+              </p>
+            </li>
+          ))}
+        </ul>
+      )}
+      {certificates.length > 0 && (
+        <ul class="list certs">
+          {certificates.map((c) => (
+            <li class="entry-head">
+              <span>
+                {c.name} <span class="muted">{c.issuer}</span>
+              </span>
+              <time>{c.date}</time>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  )
+}
+
+<style>
+  .list {
+    list-style: none;
+    display: grid;
+    gap: 1.25rem;
+  }
+
+  .certs {
+    gap: 0.5rem;
+    margin-top: 2rem;
+  }
+
+  h3 {
+    font-size: 1.0625rem;
+    font-weight: 600;
+  }
+</style>
