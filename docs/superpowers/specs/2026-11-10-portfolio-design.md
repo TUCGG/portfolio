@@ -40,7 +40,7 @@
 | 콘텐츠 | Content Collections + `@astrojs/mdx` 8.1.x | `src/content.config.ts`, `glob()` 로더 |
 | 스키마 | `astro/zod` (zod 4) | frontmatter 검증 |
 | 스타일 | 일반 CSS + CSS 변수 | Tailwind 등 추가 안 함 |
-| 글꼴 | Pretendard Variable subset woff2 한 파일을 직접 포함 | OFL 라이선스. 전체 파일(약 2MB) 대신 subset으로 용량을 줄이고 PDF 글꼴을 고정 |
+| 글꼴 | `pretendard` 1.3.x 패키지의 dynamic subset CSS | OFL 라이선스. 브라우저가 쓰는 글자 조각만 받는다(전체 파일은 약 2MB). PDF 글꼴도 고정 |
 | PDF | `playwright` 1.65.x | `page.pdf()` |
 | 단위 테스트 | Node 내장 `node --test` | TS는 Node 타입 제거 기능으로 실행 |
 | E2E | `@playwright/test` 1.65.x | |
@@ -67,7 +67,6 @@ portfolio/
       404.astro
     styles/global.css
   public/
-    fonts/                     # Pretendard woff2
     og.png
   scripts/pdf.ts               # dist/print → dist/resume.pdf
   tests/                       # 단위 테스트, fixtures/velog-rss.xml
@@ -98,6 +97,7 @@ type Profile = {
   email: string;                    // 개인 메일
   github: string;                   // URL
   velog: string;                    // https://velog.io/@lsh7315
+  velogHandle: string;              // lsh7315 (RSS 주소에 사용)
   siteUrl: string;
   career: {
     company: string;
