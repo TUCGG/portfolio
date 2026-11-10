@@ -28,7 +28,7 @@ const sections = [
   {id: 'posts', label: '기술 글'},
   {id: 'skills', label: '기술 스택'},
   {id: 'interests', label: '취미'},
-  ...(hasEducation ? [{id: 'education', label: '학력·자격'}] : []),
+  ...(hasEducation ? [{id: 'education', label: profile.certificates.length > 0 ? '학력·자격' : '학력'}] : []),
   {id: 'contact', label: '연락처'}
 ];
 ---

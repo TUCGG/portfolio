@@ -194,7 +194,7 @@ const projects = defineCollection({
 
 ### 7.2 기타
 
-- `/print`는 `@page { size: A4; margin: 12mm; }`를 쓴다.
+- `/print`는 `@page { size: A4; margin: 10mm; }`를 쓴다(경력 다섯 곳을 2페이지에 넣으려고 12mm에서 줄임).
 - `BaseLayout`은 페이지마다 `title`, `description`, `og:title`, `og:description`, `og:image(/og.png)`를 넣는다.
 - `/resume.pdf`는 빌드 후에 생성되므로 `astro dev`에서는 404다.
 

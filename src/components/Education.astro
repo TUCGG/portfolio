@@ -3,23 +3,24 @@ import {profile} from '../data/profile.ts';
 import {formatPeriod} from '../lib/period.ts';
 
 const {education, certificates} = profile;
+const title = certificates.length > 0 ? '학력·자격' : '학력';
+// 졸업 연도만 있으면('2016') 그대로, 기간이 있으면 '2025.02 – 2029.02'
+const when = (e: (typeof education)[number]) => (e.start ? formatPeriod(e.start, e.end) : e.end.replace('-', '.'));
 ---
 
 {
   (education.length > 0 || certificates.length > 0) && (
     <section id="education" class="section" aria-labelledby="education-title">
-      <h2 id="education-title">학력·자격</h2>
+      <h2 id="education-title">{title}</h2>
       {education.length > 0 && (
         <ul class="list">
           {education.map((e) => (
             <li>
               <div class="entry-head">
                 <h3>{e.school}</h3>
-                <time>{formatPeriod(e.start, e.end)}</time>
+                <time>{when(e)}</time>
               </div>
-              <p class="muted">
-                {e.major}, {e.status}
-              </p>
+              <p class="muted">{[e.major, e.status].filter(Boolean).join(', ')}</p>
             </li>
           ))}
         </ul>

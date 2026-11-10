@@ -5,7 +5,7 @@ import {getCollection} from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import photo from '../assets/profile.webp';
 import {profile} from '../data/profile.ts';
-import {formatPeriod} from '../lib/period.ts';
+import {formatDuration, formatPeriod, monthsBetween} from '../lib/period.ts';
 import {sortProjects} from '../lib/projects.ts';
 
 const projects = sortProjects(await getCollection('projects'));
@@ -38,7 +38,7 @@ const {education, certificates} = profile;
     </section>
 
     <section>
-      <h2>경력</h2>
+      <h2>경력 <span class="total">총 {formatDuration(profile.career.reduce((sum, c) => sum + monthsBetween(c.start, c.end), 0))}</span></h2>
       {
         profile.career.map((c) => (
           <div class="block">
@@ -47,32 +47,36 @@ const {education, certificates} = profile;
               <span class="date">{formatPeriod(c.start, c.end)}</span>
             </div>
             <p class="sub">
-              {c.team}, {c.role}
+              {c.team} {c.position}, {c.role} | {formatDuration(monthsBetween(c.start, c.end))}
             </p>
-            <ul class="dash">
-              {c.achievements.map((a) => (
-                <li>{a}</li>
-              ))}
-            </ul>
-            {projects
-              .filter((p) => p.data.company === c.company)
-              .map((p) => (
-                <div class="project">
-                  <div class="row">
-                    <h4>{p.data.title}</h4>
-                    <span class="date">{formatPeriod(p.data.start, p.data.end)}</span>
-                  </div>
-                  <p class="sub">
-                    {p.data.role} | {p.data.stack.join(', ')}
-                  </p>
-                  <ul class="dash">
-                    {p.data.highlights.map((h) => (
-                      <li>{h}</li>
+            <p class="summary">{c.summary}</p>
+            {c.details.map((d) => (
+              <div class="group">
+                {d.title && <p class="group-title">{d.title}</p>}
+                <ul class="dash">
+                  {d.items.map((item) => (
+                    <li>{item}</li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+            {projects.some((p) => p.data.company === c.company) && (
+              <div class="group">
+                <p class="group-title">주요 프로젝트</p>
+                <ul class="dash">
+                  {projects
+                    .filter((p) => p.data.company === c.company)
+                    .map((p) => (
+                      <li class="row">
+                        <span>
+                          {p.data.title} <a class="link" href={detailUrl(p.id)}>{host(detailUrl(p.id))}</a>
+                        </span>
+                        <span class="date">{formatPeriod(p.data.start, p.data.end)}</span>
+                      </li>
                     ))}
-                  </ul>
-                  <p class="link"><a href={detailUrl(p.id)}>{host(detailUrl(p.id))}</a></p>
-                </div>
-              ))}
+                </ul>
+              </div>
+            )}
           </div>
         ))
       }
@@ -120,13 +124,13 @@ const {education, certificates} = profile;
     {
       (education.length > 0 || certificates.length > 0) && (
         <section>
-          <h2>학력·자격</h2>
+          <h2>{certificates.length > 0 ? '학력·자격' : '학력'}</h2>
           {education.map((e) => (
             <div class="row">
               <span>
-                {e.school}, {e.major} ({e.status})
+                {[e.school, e.major].filter(Boolean).join(' ')} ({e.status})
               </span>
-              <span class="date">{formatPeriod(e.start, e.end)}</span>
+              <span class="date">{e.start ? formatPeriod(e.start, e.end) : e.end.replace('-', '.')}</span>
             </div>
           ))}
           {certificates.map((c) => (
@@ -146,7 +150,7 @@ const {education, certificates} = profile;
 <style is:global>
   @page {
     size: A4;
-    margin: 12mm;
+    margin: 10mm;
   }
 
   @media print {
@@ -156,11 +160,11 @@ const {education, certificates} = profile;
   }
 
   .sheet {
-    max-width: 186mm;
+    max-width: 190mm;
     margin: 0 auto;
     padding: 12mm 0;
     font-size: 10pt;
-    line-height: 1.5;
+    line-height: 1.45;
   }
 
   @media print {
@@ -280,15 +284,44 @@ const {education, certificates} = profile;
     break-inside: avoid;
   }
 
+  .sheet .total {
+    margin-left: 2mm;
+    color: var(--accent);
+    font-size: 10pt;
+  }
+
+  .sheet .summary {
+    margin-top: 1mm;
+  }
+
+  .sheet .group {
+    margin-top: 1mm;
+  }
+
+  .sheet .group-title {
+    font-weight: 600;
+  }
+
+  .sheet .block + .block {
+    margin-top: 4mm;
+  }
+
   .sheet .link {
     color: var(--accent);
     font-size: 9pt;
   }
 
+  /* 2페이지에 맞추려고 기술 스택은 두 칸으로 놓는다 */
+  .sheet .skills {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5mm 6mm;
+  }
+
   .sheet .skills > div {
     display: grid;
-    grid-template-columns: 28mm 1fr;
-    gap: 3mm;
+    grid-template-columns: 26mm 1fr;
+    gap: 2mm;
   }
 
   .sheet .skills dt {

@@ -17,6 +17,25 @@ test('경력에 재직 기간이 보인다', async ({page}) => {
   await expect(page.getByText(formatPeriod(c.start, c.end))).toBeVisible();
 });
 
+test('경력에 회사가 모두 보이고 총 경력이 보인다', async ({page}) => {
+  await page.goto('./');
+  const career = page.locator('#career');
+  for (const c of profile.career) await expect(career.getByRole('heading', {name: c.company, exact: true})).toBeVisible();
+  await expect(career.getByText(/^총 \d+년( \d+개월)?$/)).toBeVisible();
+});
+
+test('학력 섹션에 학교가 모두 보인다', async ({page}) => {
+  await page.goto('./');
+  const education = page.locator('#education');
+  expect(profile.education.length).toBeGreaterThan(0);
+  for (const e of profile.education) await expect(education.getByText(e.school, {exact: true})).toBeVisible();
+});
+
+test('연봉 정보는 공개하지 않는다', async ({page}) => {
+  await page.goto('./');
+  await expect(page.getByText(/연봉|만원/)).toHaveCount(0);
+});
+
 test('375px 너비에서 가로 스크롤이 없다', async ({page}) => {
   await page.setViewportSize({width: 375, height: 800});
   await page.goto('./');

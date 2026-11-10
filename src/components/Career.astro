@@ -3,15 +3,20 @@ import type {CollectionEntry} from 'astro:content';
 
 import ProjectEntry from './ProjectEntry.astro';
 import {profile} from '../data/profile.ts';
-import {formatPeriod} from '../lib/period.ts';
+import {formatDuration, formatPeriod, monthsBetween} from '../lib/period.ts';
 
 type Props = {projects: CollectionEntry<'projects'>[]};
 
 const {projects} = Astro.props;
+// 빌드한 날 기준으로 계산한다. 배포 워크플로가 매일 다시 빌드한다.
+const total = profile.career.reduce((sum, c) => sum + monthsBetween(c.start, c.end), 0);
 ---
 
 <section id="career" class="section" aria-labelledby="career-title">
-  <h2 id="career-title">경력</h2>
+  <div class="head">
+    <h2 id="career-title">경력</h2>
+    <p class="total">총 {formatDuration(total)}</p>
+  </div>
   {
     profile.career.map((c) => {
       const own = projects.filter((p) => p.data.company === c.company);
@@ -21,22 +26,34 @@ const {projects} = Astro.props;
             <h3>{c.company}</h3>
             <time>{formatPeriod(c.start, c.end)}</time>
           </div>
-          <p class="muted">
-            {c.team}, {c.role}
-          </p>
-          <ul class="bullets achievements">
-            {c.achievements.map((a) => (
-              <li>{a}</li>
-            ))}
-          </ul>
+          <div class="meta">
+            <p class="muted">
+              {c.team} {c.position}, {c.role}
+            </p>
+            <p class="muted duration">{formatDuration(monthsBetween(c.start, c.end))}</p>
+          </div>
+          <p class="summary">{c.summary}</p>
+          {c.details.map((d) => (
+            <div class="group">
+              {d.title && <h4>{d.title}</h4>}
+              <ul class="bullets">
+                {d.items.map((item) => (
+                  <li>{item}</li>
+                ))}
+              </ul>
+            </div>
+          ))}
           {own.length > 0 && (
-            <ol class="timeline">
-              {own.map((p) => (
-                <li>
-                  <ProjectEntry project={p} />
-                </li>
-              ))}
-            </ol>
+            <div class="projects">
+              <h4>주요 프로젝트</h4>
+              <ol class="timeline">
+                {own.map((p) => (
+                  <li>
+                    <ProjectEntry project={p} />
+                  </li>
+                ))}
+              </ol>
+            </div>
           )}
         </div>
       );
@@ -45,8 +62,30 @@ const {projects} = Astro.props;
 </section>
 
 <style>
+  .head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .head h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    line-height: 1.3;
+  }
+
+  .total {
+    color: var(--accent);
+    font-weight: 700;
+  }
+
   .company + .company {
-    margin-top: 3.5rem;
+    margin-top: 3rem;
+    padding-top: 3rem;
+    border-top: 1px solid var(--rule);
   }
 
   h3 {
@@ -55,8 +94,33 @@ const {projects} = Astro.props;
     letter-spacing: -0.01em;
   }
 
-  .achievements {
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0 1rem;
+  }
+
+  .duration {
+    font-size: 0.9375rem;
+  }
+
+  .summary {
     margin-top: 1rem;
+  }
+
+  .group {
+    margin-top: 1.25rem;
+  }
+
+  h4 {
+    font-size: 1rem;
+    font-weight: 650;
+    margin-bottom: 0.5rem;
+  }
+
+  .projects {
+    margin-top: 2.5rem;
   }
 
   /* 회사 아래 프로젝트를 시간 순서로 잇는 선 */
@@ -66,7 +130,7 @@ const {projects} = Astro.props;
     /* 구조도의 최소 폭 때문에 칸이 화면보다 넓어지지 않게 한다 */
     grid-template-columns: minmax(0, 1fr);
     gap: 2.25rem;
-    margin: 2rem 0 0 0.3125rem;
+    margin: 1rem 0 0 0.3125rem;
     padding-left: 1.75rem;
     border-left: 1px solid var(--rule);
   }
