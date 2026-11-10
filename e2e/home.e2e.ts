@@ -3,11 +3,11 @@ import {expect, test} from '@playwright/test';
 import {profile} from '../src/data/profile.ts';
 import {formatPeriod} from '../src/lib/period.ts';
 
-test('첫 화면에 이름, 한 줄 소개, PDF 링크가 보인다', async ({page}) => {
+test('첫 화면 제목은 한 줄 소개이고 이름과 PDF 링크가 보인다', async ({page}) => {
   await page.goto('./');
   const main = page.getByRole('main');
-  await expect(main.getByRole('heading', {level: 1})).toHaveText(profile.name);
-  await expect(main.getByText(profile.headline)).toBeVisible();
+  await expect(main.getByRole('heading', {level: 1})).toHaveText('꾸준히 배우고, 배운 것을 실무로 연결하는 프론트엔드 개발자');
+  await expect(main.getByText(profile.name, {exact: true})).toBeVisible();
   await expect(main.getByRole('link', {name: 'PDF 다운로드'})).toHaveAttribute('href', '/portfolio/resume.pdf');
 });
 

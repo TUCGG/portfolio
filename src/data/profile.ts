@@ -28,7 +28,7 @@ export type Profile = {
 // 경력과 연락처는 이 파일에서만 고친다. 연봉은 공개하지 않는다.
 export const profile: Profile = {
   name: '이상현',
-  headline: '이러닝 표준(cmi5, xAPI) 기반 학습 서비스를 만드는 프론트엔드 개발자',
+  headline: '꾸준히 배우고, 배운 것을 실무로 연결하는 프론트엔드 개발자',
   email: 'asoeg7315@naver.com',
   github: 'https://github.com/TUCGG',
   velog: 'https://velog.io/@lsh7315',
