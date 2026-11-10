@@ -18,7 +18,9 @@
 - 화면 문구는 한국어, `<html lang="ko">`.
 - velog 피드는 `https://v2.velog.io/rss/@lsh7315`. 타임아웃 5000ms, 최근 글 5개.
 - PDF는 A4, 1~2페이지, `@page { size: A4; margin: 12mm; }`.
-- 색 토큰: 본문 `#1a1a1a`, 보조 `#555555`, 링크 `#0b57d0`, 배경 `#ffffff`. 모두 흰 배경 대비 4.5:1 이상. `:focus-visible` outline을 지우지 않는다.
+- 첫 화면 구성과 디자인은 스펙 7.1을 따른다.
+- 색 토큰은 스펙 7.1 그대로 쓴다. 본문 `#16202a`, 보조 `#5b6672`, 강조 `#0e6b57`, 배경 `#ffffff`, 메뉴 배경 `#f4f6f5`, 구분선 `#dde3e0`. `:focus-visible` outline을 지우지 않는다.
+- 카드, 그림자, 그라데이션, 전부 대문자 라벨, 링크 끝 화살표를 쓰지 않는다.
 - 글꼴: `BaseLayout`에서 `pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css`를 import하고 `font-family: 'Pretendard Variable', Pretendard, sans-serif`.
 - 테스트 파일 이름: 단위 `tests/*.test.ts`, E2E `e2e/*.e2e.ts`.
 - GitHub Actions 버전: `actions/checkout@v7`, `actions/setup-node@v7`, `actions/upload-pages-artifact@v5`, `actions/deploy-pages@v5`.
@@ -35,18 +37,21 @@
 
 ---
 
-### Task 1: 기본 틀, 첫 화면, 경력, 기술 스택, 404
+### Task 1: 기본 틀, 메뉴, 소개, 경력, 기술 스택, 학력·자격, 연락처, 404
 
 **Files:**
 - Create: `.nvmrc`, `.gitignore`, `package.json`, `astro.config.mjs`, `tsconfig.json`, `playwright.config.ts`
 - Create: `src/data/profile.ts`, `src/lib/period.ts`, `src/styles/global.css`, `src/layouts/BaseLayout.astro`
-- Create: `src/components/Hero.astro`, `src/components/Career.astro`, `src/components/Skills.astro`
+- Create: `src/components/Sidebar.astro`, `src/components/About.astro`, `src/components/Career.astro`, `src/components/Skills.astro`, `src/components/Education.astro`, `src/components/Contact.astro`
 - Create: `src/pages/index.astro`, `src/pages/404.astro`
 - Test: `tests/period.test.ts`, `e2e/home.e2e.ts`
 
 **Interfaces:**
 - Produces:
-  - `src/data/profile.ts`: `export type Profile`(스펙 6.1과 같음, `velogHandle` 포함), `export const profile`
+  - `src/data/profile.ts`: `export type Profile`(스펙 6.1과 같음. `velogHandle`, `about`, `education`, `certificates` 포함), `export const profile`
+  - `Sidebar.astro` props: `{sections: {id: string; label: string}[]}`. `<nav aria-label="섹션">` 안에 `<a href="#{id}">{label}</a>`.
+  - `index.astro`는 실제로 렌더링하는 섹션만 `sections`에 넣는다. 순서: `about` 소개, `career` 경력, `projects` 프로젝트(Task 2, 개인 프로젝트가 있을 때만), `posts` 기술 글(Task 3), `skills` 기술 스택, `education` 학력·자격(둘 중 하나라도 있을 때만), `contact` 연락처.
+  - `Career.astro`에는 회사마다 프로젝트를 넣을 자리(named slot 또는 props)를 둔다. Task 2에서 채운다.
   - `src/lib/period.ts`: `formatPeriod(start: string, end?: string): string`. `YYYY-MM`을 `YYYY.MM`으로 바꾼다. 구분자는 ` – `(en dash), `end`가 없으면 `현재`.
   - `src/layouts/BaseLayout.astro` props: `{title: string; description: string; noindex?: boolean}`
   - npm scripts: `dev`, `build`, `preview`, `test`, `pdf`, `test:e2e`, `verify`(Task 4에서 `pdf` 구현)
@@ -128,7 +133,8 @@ Expected: FAIL (`period.ts` 없음)
   - `velog: 'https://velog.io/@lsh7315'`, `velogHandle: 'lsh7315'`
   - `siteUrl: 'https://<GitHub 아이디>.github.io'`
   - `career[0]`: `company: '버블콘'`, `team: '개발사업부 UX개발팀'`, `start: <입사 연월>`
-- 나머지(`headline`, `role`, `achievements`, `skills`, `pinnedPosts`)는 Step 1의 초안을 넣는다. `pinnedPosts`는 Task 3 전까지 빈 배열이어도 된다.
+- 나머지(`headline`, `about`, `role`, `achievements`, `skills`, `pinnedPosts`)는 Step 1의 초안을 넣는다. `pinnedPosts`는 Task 3 전까지 빈 배열이어도 된다.
+- `education`, `certificates`는 Task 6에서 받는다. 그 전까지는 빈 배열이고, 섹션과 메뉴 항목이 숨겨진다.
 
 Run: `npm test`
 Expected: PASS 2
@@ -157,6 +163,23 @@ test('375px 너비에서 가로 스크롤이 없다', async ({page}) => {
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
 });
 
+test('메뉴 링크마다 같은 id의 섹션이 하나씩 있다', async ({page}) => {
+  await page.goto('/');
+  const hrefs = await page
+    .getByRole('navigation', {name: '섹션'})
+    .getByRole('link')
+    .evaluateAll((els) => els.map((a) => a.getAttribute('href')));
+  expect(hrefs.length).toBeGreaterThan(0);
+  for (const href of hrefs) await expect(page.locator(href!)).toHaveCount(1);
+});
+
+test('메뉴에서 경력을 누르면 그 링크가 현재 위치로 표시된다', async ({page}) => {
+  await page.goto('/');
+  const link = page.getByRole('navigation', {name: '섹션'}).getByRole('link', {name: '경력'});
+  await link.click();
+  await expect(link).toHaveAttribute('aria-current', 'true');
+});
+
 test('Tab으로 이동하면 포커스 표시가 보인다', async ({page}) => {
   await page.goto('/');
   await page.keyboard.press('Tab');
@@ -181,18 +204,35 @@ Expected: FAIL (페이지 없음)
   - `og:title`, `og:description`, `og:image`(`new URL('/og.png', Astro.site)`)
   - `noindex`면 `<meta name="robots" content="noindex">`
   - pretendard CSS와 `global.css`를 import한다.
+  - 첫 포커스 요소는 `본문으로 건너뛰기` 링크(`#main`)다. 포커스를 받을 때만 보인다.
 - `global.css`:
-  - Global Constraints의 색 토큰을 CSS 변수로 둔다.
+  - 스펙 7.1의 색 토큰을 CSS 변수로 둔다.
   - `overflow-wrap: anywhere`로 긴 단어가 줄바꿈되게 한다.
-  - `:focus-visible { outline: 2px solid var(--link); outline-offset: 2px; }`
-- `Hero`: `h1` 이름, 한 줄 소개, 링크(메일 `mailto:`, GitHub, velog, `PDF 다운로드` → `/resume.pdf`)
-- `Career`: `<section aria-labelledby>` + `h2` "경력". 항목마다 회사·팀·`formatPeriod`·역할·성과 목록을 둔다.
-- `Skills`: `h2` "기술 스택". 그룹별 목록.
-- `index.astro`: Hero → Career → Skills. Task 2와 3에서 그 사이에 섹션을 넣는다.
+  - `:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }`
+  - `@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }`
+  - 섹션에 `scroll-margin-top`을 줘서 모바일 상단 막대에 제목이 가리지 않게 한다.
+- `Sidebar`:
+  - 데스크톱(1024px 이상)은 왼쪽 고정, 너비 240px, 배경 `#f4f6f5`.
+  - 위에 이름(제목 요소 아님)과 한 줄 소개를 두고, 아래에 메뉴와 `PDF 다운로드`를 둔다.
+  - 모바일은 위쪽 sticky 막대가 된다. 메뉴 `ul`만 `overflow-x: auto`로 가로 스크롤한다.
+  - inline script로 `IntersectionObserver`를 쓴다. 화면에 들어온 섹션의 링크에 `aria-current="true"`를 붙이고 나머지에서는 뗀다. 강조 막대는 왼쪽 2px `--accent`.
+- `About`(`#about`): `h1` 이름(800, -0.03em), 한 줄 소개, 링크(메일 `mailto:`, GitHub, velog, `PDF 다운로드` → `/resume.pdf`), `about` 문단.
+- `Career`(`#career`): `h2` "경력".
+  - 회사마다 회사·팀·역할 줄을 두고, 오른쪽에 `formatPeriod`를 표시한다.
+  - 아래에 성과 목록과 프로젝트 자리를 둔다.
+  - 프로젝트 자리는 왼쪽 세로 선(1px `--rule`, 항목 점은 `--accent`)으로 이은 타임라인이다.
+- `Skills`(`#skills`): `h2` "기술 스택". 그룹 이름과 항목을 한 줄씩 정의 목록(`dl`)으로 둔다.
+- `Education`(`#education`): `h2` "학력·자격". `education`과 `certificates`가 모두 비면 렌더링하지 않는다.
+- `Contact`(`#contact`): `h2` "연락처". 메일, GitHub, velog 링크. 폼은 없다.
+- `index.astro`: Sidebar + `<main id="main">` 안에 About → Career → Skills → Education → Contact. Task 2와 3에서 섹션을 끼워 넣는다.
 - `404.astro`: `h1` "페이지를 찾을 수 없습니다", `첫 화면으로` 링크.
 
 Run: `npm run build && npm run test:e2e`
-Expected: PASS 5
+Expected: PASS 7
+
+- [ ] **Step 8-1: 화면을 눈으로 확인한다**
+
+preview를 띄우고 1280px과 375px 스크린샷을 찍는다. 스펙 7.1의 그림과 비교하고, 어긋난 간격이나 정렬을 고친다.
 
 - [ ] **Step 9: 커밋**
 
@@ -205,9 +245,9 @@ git add -A && git commit -m "feat: Astro 기본 틀과 첫 화면, 경력, 기�
 ### Task 2: 프로젝트 컬렉션, 카드, 상세 페이지
 
 **Files:**
-- Create: `src/content.config.ts`, `src/lib/projects.ts`, `src/components/ProjectCard.astro`, `src/pages/projects/[slug].astro`
-- Create: `src/content/projects/cmi5-courseware-v2.mdx`(샘플. Task 6에서 다시 씀)
-- Modify: `src/pages/index.astro`(Career와 Skills 사이에 프로젝트 섹션)
+- Create: `src/content.config.ts`, `src/lib/projects.ts`, `src/components/ProjectEntry.astro`, `src/components/Projects.astro`, `src/pages/projects/[slug].astro`
+- Create: `src/content/projects/cmi5-courseware-v2.mdx`(샘플, `company: '버블콘'`. Task 6에서 다시 씀)
+- Modify: `src/pages/index.astro`(회사 프로젝트를 Career에 넘기고, 개인 프로젝트가 있으면 Career 다음에 Projects 섹션), `src/components/Career.astro`
 - Test: `tests/projects.test.ts`, `e2e/projects.e2e.ts`
 
 **Interfaces:**
@@ -215,7 +255,9 @@ git add -A && git commit -m "feat: Astro 기본 틀과 첫 화면, 경력, 기�
 - Produces:
   - 컬렉션 `projects`. 스키마는 스펙 6.2 그대로이며 `astro/zod`의 `z`를 쓴다.
   - `src/lib/projects.ts`: `sortProjects<T extends {id: string; data: {order: number}}>(entries: T[]): T[]`. `order` 오름차순, 같으면 `id` 오름차순. 입력 배열은 바꾸지 않는다.
-  - `ProjectCard.astro` props: `{project: CollectionEntry<'projects'>}`. 마크업은 `<article>` 안에 `<h3><a href="/projects/{id}/">{title}</a></h3>`, 이어서 summary, highlights, 회사·기간, 스택.
+  - `ProjectEntry.astro` props: `{project: CollectionEntry<'projects'>}`. 마크업은 `<article>` 안에 `<h3><a href="/projects/{id}/">{title}</a></h3>`와 오른쪽 기간, 이어서 역할, summary, highlights 목록, 스택(쉼표로 이은 한 줄).
+  - 경력 타임라인과 Projects 섹션이 같은 `ProjectEntry`를 쓴다.
+  - 경력에는 `project.data.company === career.company`인 항목만 넣는다. `'개인'`은 Projects 섹션(`#projects`, `h2` "프로젝트")에 넣는다.
   - 상세 URL: `/projects/{entry.id}/`
 
 - [ ] **Step 1: 실패하는 단위 테스트를 쓴다** (`tests/projects.test.ts`)
@@ -277,9 +319,11 @@ test('상세 페이지는 375px 너비에서 가로 스크롤이 없다', async 
 Run: `npm run build && npm run test:e2e`
 Expected: 새 테스트 2개 FAIL
 
-- [ ] **Step 6: 카드, 프로젝트 섹션, 상세 페이지를 구현한다**
+- [ ] **Step 6: 프로젝트 항목, 섹션, 상세 페이지를 구현한다**
 
-- `index.astro`: `h2` "프로젝트" 섹션에 `sortProjects(await getCollection('projects'))`를 `ProjectCard`로 렌더링한다.
+- `index.astro`:
+  - `sortProjects(await getCollection('projects'))`를 회사별로 나눠 `Career`의 프로젝트 자리에 `ProjectEntry`로 넣는다.
+  - `'개인'` 항목이 있으면 `Projects` 섹션을 렌더링하고 메뉴에 `projects`를 추가한다.
 - `[slug].astro`:
   - `getStaticPaths`는 컬렉션 전체에서 `params: {slug: entry.id}`를 만든다.
   - 머리말: `h1` 제목, 회사, `formatPeriod`, 역할, 스택, 있는 링크만 표시한다.
@@ -421,7 +465,7 @@ Expected: 모두 PASS
 
 - `profile.pinnedPosts`에 velog의 대표 글 2~3개(제목, URL)를 넣는다. 사용자에게 고르게 하고, 정하기 전에는 React 19.3 글과 CASS v2 글을 초안으로 쓴다.
 - `index.astro`는 빌드할 때 `mergePosts(profile.pinnedPosts, await fetchVelogPosts(profile.velogHandle))`를 `Posts`에 넘긴다.
-- `Posts`: `h2` "기술 글". "대표 글" 목록과 "최근 글" 목록을 둔다. 최근 글에는 날짜(`YYYY.MM.DD`)를 붙이고, 최근 글이 없으면 그 목록은 렌더링하지 않는다. 맨 아래에 velog 전체 보기 링크를 둔다.
+- `Posts`(`#posts`): `h2` "기술 글". 메뉴에 `posts`를 추가한다. "대표 글" 목록과 "최근 글" 목록을 둔다. 최근 글에는 날짜(`YYYY.MM.DD`)를 붙이고, 최근 글이 없으면 그 목록은 렌더링하지 않는다. 맨 아래에 velog 전체 보기 링크를 둔다.
 - `e2e/home.e2e.ts`에 추가:
 
 ```ts
@@ -479,7 +523,7 @@ Expected: 두 테스트 FAIL
 - [ ] **Step 2: `print.astro`를 구현한다**
 
 - `BaseLayout`에 `noindex`를 넘긴다.
-- 내용: 이름, 한 줄 소개, 메일, 사이트 주소(`profile.siteUrl`), 경력, 프로젝트(정렬 후 제목, 회사, 기간, 역할, 스택, highlights, `{siteUrl}/projects/{id}/`), 기술 스택. 이미지는 넣지 않는다.
+- 내용: 이름, 한 줄 소개, 메일, 사이트 주소(`profile.siteUrl`), 경력, 프로젝트(정렬 후 제목, 회사, 기간, 역할, 스택, highlights, `{siteUrl}/projects/{id}/`), 기술 스택, 학력·자격(있을 때만). 이미지는 넣지 않는다.
 - 인쇄 규칙은 `<style is:global>`에 둔다. `@page { size: A4; margin: 12mm; }`, 본문 10pt 안팎, 링크는 주소가 보이게 쓴다.
 
 - [ ] **Step 3: `scripts/pdf.ts`를 구현한다**
@@ -611,7 +655,8 @@ Expected: Actions의 deploy 실행이 성공하고 `https://<GitHub 아이디>.g
 - 프로젝트별 공개 범위
 - 성과 수치
 - 사이드 프로젝트 1개
-- 한 줄 소개, 기술 스택, 대표 글
+- 한 줄 소개, 소개 문단, 기술 스택, 대표 글
+- 학력과 자격증(넣을지와 내용)
 
 받은 대로 고친다.
 

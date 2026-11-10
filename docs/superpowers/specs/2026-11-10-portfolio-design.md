@@ -99,6 +99,7 @@ type Profile = {
   velog: string;                    // https://velog.io/@lsh7315
   velogHandle: string;              // lsh7315 (RSS 주소에 사용)
   siteUrl: string;
+  about: string[];                  // 소개 문단 2~3개
   career: {
     company: string;
     team: string;
@@ -109,6 +110,8 @@ type Profile = {
   }[];
   skills: {group: string; items: string[]}[];
   pinnedPosts: {title: string; url: string}[];   // 고정할 대표 글 2~3개
+  education: {school: string; major: string; start: string; end?: string; status: string}[];  // 비면 섹션 숨김
+  certificates: {name: string; issuer: string; date: string}[];                              // 비면 섹션 숨김
 };
 
 export const profile = {...} satisfies Profile;
@@ -149,10 +152,43 @@ const projects = defineCollection({
 
 | 경로 | 내용 |
 |---|---|
-| `/` | 한 페이지. 첫 화면(이름, 한 줄 소개, 메일, GitHub, velog, PDF 다운로드) → 경력 → 프로젝트 카드(`order` 순) → 기술 글 → 기술 스택 |
+| `/` | 한 페이지. 왼쪽 고정 메뉴 + 섹션: 소개 → 경력(회사별 프로젝트) → 프로젝트(개인) → 기술 글 → 기술 스택 → 학력·자격(있을 때만) → 연락처 |
 | `/projects/[slug]` | 제목, 회사, 기간, 역할, 스택, 링크, 커버 이미지, 본문 |
-| `/print` | PDF 원본. 메뉴에 노출하지 않고 `noindex`. 이미지 없이 연락처, 사이트 주소, 경력, 프로젝트(제목, 회사, 기간, 역할, 스택, highlights, 상세 주소), 스택 |
+| `/print` | PDF 원본. 메뉴에 노출하지 않고 `noindex`. 이미지 없이 연락처, 사이트 주소, 경력, 프로젝트(제목, 회사, 기간, 역할, 스택, highlights, 상세 주소), 스택, 학력·자격(있을 때만) |
 | `/404` | 첫 화면 링크 |
+
+### 7.1 첫 화면 구성과 디자인
+
+구성은 사용자가 준 참고 사이트(`yoohyeok.github.io/u-it`)를 따른다. 왼쪽 고정 메뉴에 섹션 링크를 두고, 오른쪽에 섹션을 차례로 놓는다. 참고 사이트보다 덜어낸다: 진한 색 블록, 전부 대문자 라벨, 이력서 수준의 교육 세부 내용은 쓰지 않는다.
+
+```
+데스크톱(1024px 이상)
++-------------+---------------------------------------------+
+| 이상현       | 이상현                                      |
+| 프론트엔드   | 한 줄 소개                                   |
+|             | 메일   GitHub   velog   PDF 다운로드         |
+| 소개         | 소개 문단                                    |
+| 경력  ▌     |                                             |
+| 프로젝트     | 경력                                         |
+| 기술 글      | 버블콘 개발사업부 UX개발팀      2023.02 – 현재 |
+| 기술 스택    |  │ cmi5 코스웨어 v2           2024.xx – ...  |
+| 학력·자격    |  │ 요약 / 핵심 성과 / 기술 / 자세히 보기      |
+| 연락처       |  │ CASS v2 ...                               |
++-------------+---------------------------------------------+
+모바일: 메뉴가 위쪽 고정 막대가 되고 링크는 막대 안에서만 가로로 스크롤한다.
+```
+
+- 소개 섹션(`#about`)의 `h1`이 이름이다. 사이드 메뉴의 이름은 제목 요소가 아니다.
+- 경력은 회사 아래에 그 회사의 프로젝트(`company`가 같은 항목)를 세로 선으로 이은 타임라인으로 보여준다. 이 타임라인이 페이지에서 유일하게 눈에 띄는 장치다. 실제로 시간 순서가 있는 내용이라 세로 선을 쓴다.
+- `company`가 `'개인'`인 프로젝트는 "프로젝트" 섹션에 따로 둔다.
+- 날짜는 오른쪽 정렬, `font-variant-numeric: tabular-nums`.
+- 카드, 그림자, 그라데이션을 쓰지 않는다. 항목 사이는 여백과 얇은 구분선으로 나눈다.
+- 메뉴는 화면에 보이는 섹션의 링크에 `aria-current="true"`와 강조 막대를 표시한다(작은 inline script, `IntersectionObserver`). 스크립트가 없어도 링크는 동작한다.
+- 부드러운 스크롤은 `prefers-reduced-motion: no-preference`일 때만 쓴다.
+- 색: 본문 `#16202a`, 보조 `#5b6672`, 강조 `#0e6b57`, 배경 `#ffffff`, 메뉴 배경 `#f4f6f5`, 구분선 `#dde3e0`. 글자색은 모두 배경 대비 4.5:1 이상.
+- 글꼴은 Pretendard 하나만 쓴다. 이름은 800, 자간 -0.03em. 본문은 16px, 줄 간격 1.7, 본문 폭 최대 720px.
+
+### 7.2 기타
 
 - `/print`는 `@page { size: A4; margin: 12mm; }`를 쓴다.
 - `BaseLayout`은 페이지마다 `title`, `description`, `og:title`, `og:description`, `og:image(/og.png)`를 넣는다.
