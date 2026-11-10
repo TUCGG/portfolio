@@ -3,6 +3,7 @@ import {Image} from 'astro:assets';
 
 import photo from '../assets/profile.webp';
 import {profile} from '../data/profile.ts';
+import {withBase} from '../lib/base.ts';
 
 type Props = {sections: {id: string; label: string}[]};
 
@@ -33,7 +34,7 @@ const {sections} = Astro.props;
       }
     </ul>
   </nav>
-  <a class="pdf" href="/resume.pdf">PDF 다운로드</a>
+  <a class="pdf" href={withBase('/resume.pdf')}>PDF 다운로드</a>
 </header>
 
 <script>

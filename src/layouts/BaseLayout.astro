@@ -1,11 +1,12 @@
 ---
 import 'pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css';
 import '../styles/global.css';
+import {withBase} from '../lib/base.ts';
 
 type Props = {title: string; description: string; noindex?: boolean};
 
 const {title, description, noindex = false} = Astro.props;
-const ogImage = new URL('/og.png', Astro.site);
+const ogImage = new URL(withBase('/og.png'), Astro.site);
 ---
 
 <!doctype html>

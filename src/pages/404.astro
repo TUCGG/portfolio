@@ -1,13 +1,14 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import {profile} from '../data/profile.ts';
+import {withBase} from '../lib/base.ts';
 ---
 
 <BaseLayout title={`페이지를 찾을 수 없습니다 | ${profile.name}`} description="요청한 주소에 페이지가 없습니다." noindex>
   <main id="main">
     <h1>페이지를 찾을 수 없습니다</h1>
     <p class="muted">주소가 바뀌었거나 삭제된 페이지입니다.</p>
-    <a href="/">첫 화면으로</a>
+    <a href={withBase('/')}>첫 화면으로</a>
   </main>
 </BaseLayout>
 

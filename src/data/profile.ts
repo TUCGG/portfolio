@@ -30,7 +30,7 @@ export const profile: Profile = {
   github: 'https://github.com/TUCGG',
   velog: 'https://velog.io/@lsh7315',
   velogHandle: 'lsh7315',
-  siteUrl: 'https://tucgg.github.io',
+  siteUrl: 'https://tucgg.github.io/portfolio',
   about: [
     '버블콘 개발사업부 UX개발팀에서 이러닝 수업꾸러미 저작도구와 역량 관리 솔루션을 만듭니다. 화면을 중심으로 일하지만, 필요한 서버 API와 배포까지 직접 맡습니다.',
     '새 기술은 샘플 프로젝트로 직접 검증한 뒤 문서로 정리해 팀에 공유합니다. React 19.3, Playwright, TypeScript 7 같은 주제를 다뤄 왔습니다.'

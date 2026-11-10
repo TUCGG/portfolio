@@ -3,6 +3,7 @@ import {Image} from 'astro:assets';
 
 import photo from '../assets/profile.webp';
 import {profile} from '../data/profile.ts';
+import {withBase} from '../lib/base.ts';
 ---
 
 <section id="about" class="section about" aria-labelledby="about-title">
@@ -13,7 +14,7 @@ import {profile} from '../data/profile.ts';
     <li><a href={`mailto:${profile.email}`}>메일</a></li>
     <li><a href={profile.github}>GitHub</a></li>
     <li><a href={profile.velog}>velog</a></li>
-    <li><a class="pdf" href="/resume.pdf">PDF 다운로드</a></li>
+    <li><a class="pdf" href={withBase('/resume.pdf')}>PDF 다운로드</a></li>
   </ul>
   <div class="intro">
     {profile.about.map((p) => <p>{p}</p>)}

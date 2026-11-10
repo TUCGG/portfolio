@@ -6,6 +6,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import Diagram from '../../components/Diagram.astro';
 import TechChips from '../../components/TechChips.astro';
 import {profile} from '../../data/profile.ts';
+import {withBase} from '../../lib/base.ts';
 import {formatPeriod} from '../../lib/period.ts';
 
 export async function getStaticPaths() {
@@ -18,7 +19,7 @@ type Props = {entry: CollectionEntry<'projects'>};
 const {entry} = Astro.props;
 const {title, company, start, end, role, stack, summary, links, cover, coverAlt} = entry.data;
 const {Content} = await render(entry);
-const back = company === '개인' ? '/#projects' : '/#career';
+const back = withBase(company === '개인' ? '/#projects' : '/#career');
 
 const linkRows = [
   links.demo && {label: '데모', href: links.demo},

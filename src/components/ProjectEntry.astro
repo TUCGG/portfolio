@@ -3,6 +3,7 @@ import type {CollectionEntry} from 'astro:content';
 
 import Diagram from './Diagram.astro';
 import TechChips from './TechChips.astro';
+import {withBase} from '../lib/base.ts';
 import {formatPeriod} from '../lib/period.ts';
 
 type Props = {project: CollectionEntry<'projects'>};
@@ -13,7 +14,7 @@ const {title, start, end, role, summary, highlights, stack} = project.data;
 
 <article class="project">
   <div class="entry-head">
-    <h3><a href={`/projects/${project.id}/`}>{title}</a></h3>
+    <h3><a href={withBase(`/projects/${project.id}/`)}>{title}</a></h3>
     <time>{formatPeriod(start, end)}</time>
   </div>
   <p class="muted role">{role}</p>
