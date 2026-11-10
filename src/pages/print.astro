@@ -1,0 +1,266 @@
+---
+import {getCollection} from 'astro:content';
+
+import BaseLayout from '../layouts/BaseLayout.astro';
+import {profile} from '../data/profile.ts';
+import {formatPeriod} from '../lib/period.ts';
+import {sortProjects} from '../lib/projects.ts';
+
+const projects = sortProjects(await getCollection('projects'));
+const personal = projects.filter((p) => p.data.company === '개인');
+const host = (url: string) => url.replace(/^https?:\/\//, '');
+const detailUrl = (id: string) => `${host(profile.siteUrl)}/projects/${id}/`;
+const {education, certificates} = profile;
+---
+
+<BaseLayout title={`${profile.name} 이력서`} description={profile.headline} noindex>
+  <main id="main" class="sheet">
+    <header class="head">
+      <h1>{profile.name}</h1>
+      <p class="headline">{profile.headline}</p>
+      <ul class="contact">
+        <li>{profile.email}</li>
+        <li>{host(profile.siteUrl)}</li>
+        <li>{host(profile.github)}</li>
+        <li>{host(profile.velog)}</li>
+      </ul>
+    </header>
+
+    <section>
+      <h2>소개</h2>
+      {profile.about.map((p) => <p>{p}</p>)}
+    </section>
+
+    <section>
+      <h2>경력</h2>
+      {
+        profile.career.map((c) => (
+          <div class="block">
+            <div class="row">
+              <h3>{c.company}</h3>
+              <span class="date">{formatPeriod(c.start, c.end)}</span>
+            </div>
+            <p class="sub">
+              {c.team}, {c.role}
+            </p>
+            <ul class="dash">
+              {c.achievements.map((a) => (
+                <li>{a}</li>
+              ))}
+            </ul>
+            {projects
+              .filter((p) => p.data.company === c.company)
+              .map((p) => (
+                <div class="project">
+                  <div class="row">
+                    <h4>{p.data.title}</h4>
+                    <span class="date">{formatPeriod(p.data.start, p.data.end)}</span>
+                  </div>
+                  <p class="sub">
+                    {p.data.role} | {p.data.stack.join(', ')}
+                  </p>
+                  <ul class="dash">
+                    {p.data.highlights.map((h) => (
+                      <li>{h}</li>
+                    ))}
+                  </ul>
+                  <p class="link">{detailUrl(p.id)}</p>
+                </div>
+              ))}
+          </div>
+        ))
+      }
+    </section>
+
+    {
+      personal.length > 0 && (
+        <section>
+          <h2>개인 프로젝트</h2>
+          {personal.map((p) => (
+            <div class="project">
+              <div class="row">
+                <h4>{p.data.title}</h4>
+                <span class="date">{formatPeriod(p.data.start, p.data.end)}</span>
+              </div>
+              <p class="sub">
+                {p.data.role} | {p.data.stack.join(', ')}
+              </p>
+              <ul class="dash">
+                {p.data.highlights.map((h) => (
+                  <li>{h}</li>
+                ))}
+              </ul>
+              <p class="link">{detailUrl(p.id)}</p>
+            </div>
+          ))}
+        </section>
+      )
+    }
+
+    <section>
+      <h2>기술 스택</h2>
+      <dl class="skills">
+        {
+          profile.skills.map((s) => (
+            <div>
+              <dt>{s.group}</dt>
+              <dd>{s.items.join(', ')}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </section>
+
+    {
+      (education.length > 0 || certificates.length > 0) && (
+        <section>
+          <h2>학력·자격</h2>
+          {education.map((e) => (
+            <div class="row">
+              <span>
+                {e.school}, {e.major} ({e.status})
+              </span>
+              <span class="date">{formatPeriod(e.start, e.end)}</span>
+            </div>
+          ))}
+          {certificates.map((c) => (
+            <div class="row">
+              <span>
+                {c.name}, {c.issuer}
+              </span>
+              <span class="date">{c.date}</span>
+            </div>
+          ))}
+        </section>
+      )
+    }
+  </main>
+</BaseLayout>
+
+<style is:global>
+  @page {
+    size: A4;
+    margin: 12mm;
+  }
+
+  @media print {
+    .skip {
+      display: none;
+    }
+  }
+
+  .sheet {
+    max-width: 186mm;
+    margin: 0 auto;
+    padding: 12mm 0;
+    font-size: 10pt;
+    line-height: 1.55;
+  }
+
+  @media print {
+    .sheet {
+      padding: 0;
+    }
+  }
+
+  .sheet h1 {
+    font-size: 22pt;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.2;
+  }
+
+  .sheet .headline {
+    margin-top: 2mm;
+    font-size: 11pt;
+    font-weight: 500;
+  }
+
+  .sheet .contact {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1mm 5mm;
+    margin-top: 2mm;
+    color: var(--muted);
+  }
+
+  .sheet section {
+    margin-top: 6mm;
+    break-inside: auto;
+  }
+
+  .sheet h2 {
+    font-size: 11pt;
+    font-weight: 700;
+    padding-bottom: 1mm;
+    margin-bottom: 2.5mm;
+    border-bottom: 1px solid var(--ink);
+  }
+
+  .sheet h3 {
+    font-size: 11pt;
+    font-weight: 700;
+  }
+
+  .sheet h4 {
+    font-size: 10pt;
+    font-weight: 600;
+  }
+
+  .sheet .row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 4mm;
+  }
+
+  .sheet .date {
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .sheet .sub {
+    color: var(--muted);
+  }
+
+  .sheet .dash {
+    list-style: none;
+    margin-top: 1mm;
+  }
+
+  .sheet .dash > li {
+    position: relative;
+    padding-left: 3.5mm;
+  }
+
+  .sheet .dash > li::before {
+    content: '-';
+    position: absolute;
+    left: 0;
+    color: var(--muted);
+  }
+
+  .sheet .project {
+    margin-top: 3.5mm;
+    padding-left: 4mm;
+    border-left: 1px solid var(--rule);
+    break-inside: avoid;
+  }
+
+  .sheet .link {
+    color: var(--accent);
+    font-size: 9pt;
+  }
+
+  .sheet .skills > div {
+    display: grid;
+    grid-template-columns: 28mm 1fr;
+    gap: 3mm;
+  }
+
+  .sheet .skills dt {
+    color: var(--muted);
+  }
+</style>
