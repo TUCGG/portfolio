@@ -1,0 +1,34 @@
+---
+title: 회사 홈페이지 리뉴얼과 운영
+company: 버블콘
+start: '2023-12'
+role: 초기 구축부터 운영까지 서버·프론트엔드 개발
+stack: [Next.js 13, React, TypeScript, Tailwind CSS, NestJS, TypeORM, MySQL, AWS S3]
+summary: WordPress 홈페이지를 Next.js와 NestJS로 다시 만들고 게시판 관리자를 붙인 회사 홈페이지
+highlights:
+  - Next.js·NestJS·MySQL로 초기 구축, JWT 관리자와 게시판 CMS 구현
+  - S3 presigned 업로드, 글 수정·삭제 때 남는 이미지 정리, CDN 주소로 전환
+  - 웹 취약점 대응, 제목 구조와 웹 접근성 개선, 게시글별 메타 태그와 사이트맵
+order: 3
+---
+
+## 문제
+
+WordPress로 만든 회사 홈페이지는 소식 게시판을 관리하기 어렵고, 보안 패치와 화면 수정을 직접 통제하기 힘들었습니다.
+
+## 역할
+
+초기 커밋과 기본 설정부터 시작해 2023년 12월부터 지금까지 운영하고 있습니다. 전체 커밋 307개 중 171개를 작성했습니다.
+
+## 해결
+
+- Next.js App Router로 공개 페이지를, NestJS·TypeORM·MySQL로 API와 관리자 기능을 만들었습니다.
+- 관리자는 JWT로 인증하고, 게시판은 에디터와 이미지 업로드를 지원합니다.
+- 이미지는 S3 presigned URL로 올리고, 글을 수정하거나 삭제하면 본문에서 빠진 이미지를 S3에서 지웁니다. 이미지 주소는 CDN으로 바꿨습니다.
+- 게시글마다 메타 태그를 넣고 `robots`와 `sitemap`을 만들었습니다. 문의 폼은 reCAPTCHA를 거쳐 메일로 보냅니다.
+
+## 결과
+
+- 웹 취약점 점검 결과에 따라 보안 헤더(CSP, X-Frame-Options)와 비정상 접근 오류 처리를 보강했습니다.
+- 제목 구조를 정리하고 웹 접근성 항목을 수정했습니다.
+- 암호 키를 서버 관리로 옮기고 Node 24로 올리는 등 운영을 이어 가고 있습니다.

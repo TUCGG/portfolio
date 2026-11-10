@@ -31,7 +31,7 @@ export const profile: Profile = {
   velogHandle: 'lsh7315',
   siteUrl: 'https://tucgg.github.io',
   about: [
-    '버블콘 개발사업부 UX개발팀에서 이러닝 코스웨어와 역량 관리 솔루션의 프론트엔드를 개발합니다.',
+    '버블콘 개발사업부 UX개발팀에서 이러닝 수업꾸러미 저작도구와 역량 관리 솔루션을 만듭니다. 화면을 중심으로 일하지만, 필요한 서버 API와 배포까지 직접 맡습니다.',
     '새 기술은 샘플 프로젝트로 직접 검증한 뒤 문서로 정리해 팀에 공유합니다. React 19.3, Playwright, TypeScript 7 같은 주제를 다뤄 왔습니다.'
   ],
   career: [
@@ -39,18 +39,20 @@ export const profile: Profile = {
       company: '버블콘',
       team: '개발사업부 UX개발팀',
       start: '2023-02',
-      role: '프론트엔드 개발',
+      role: '웹 개발',
       achievements: [
-        '이러닝 코스웨어, 역량 관리 솔루션, 회사 홈페이지의 프론트엔드 개발',
+        'cmi5 수업꾸러미 저작도구, 역량 관리 솔루션 v2, 회사 홈페이지를 초기 구축부터 개발',
+        '역량 관리 솔루션 v1(CaSS 기반) 서버와 학습맵 뷰어의 유지보수와 기능 추가',
         'React, Playwright, TypeScript 신기술 검증 문서를 작성해 팀에 공유'
       ]
     }
   ],
   skills: [
     {group: '언어', items: ['TypeScript', 'JavaScript', 'HTML', 'CSS']},
-    {group: '프레임워크', items: ['React', 'TanStack Query', 'Vite', 'Astro']},
-    {group: '테스트', items: ['Vitest', 'Playwright']},
-    {group: '이러닝 표준', items: ['SCORM', 'xAPI', 'cmi5']}
+    {group: '프론트엔드', items: ['React', 'Next.js', 'TanStack Query', 'Zustand', 'Vite', 'Tailwind CSS']},
+    {group: '서버', items: ['Node.js', 'Express', 'NestJS', 'Elasticsearch', 'MySQL', 'SAML']},
+    {group: '테스트·품질', items: ['Vitest', 'Playwright', 'SonarQube', 'Semgrep']},
+    {group: '이러닝 표준', items: ['SCORM', 'xAPI', 'cmi5', 'IMS CASE']}
   ],
   pinnedPosts: [
     {
