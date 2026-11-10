@@ -1,0 +1,104 @@
+---
+import {profile} from '../data/profile.ts';
+import type {PinnedPost, Post} from '../lib/velog.ts';
+
+type Props = {pinned: PinnedPost[]; recent: Post[]};
+
+const {pinned, recent} = Astro.props;
+
+const dateParts = new Intl.DateTimeFormat('ko-KR', {
+  timeZone: 'Asia/Seoul',
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit'
+});
+const formatDate = (d: Date) => {
+  const part = (type: string) => dateParts.formatToParts(d).find((p) => p.type === type)?.value;
+  return `${part('year')}.${part('month')}.${part('day')}`;
+};
+const isoDate = (d: Date) => d.toISOString().slice(0, 10);
+---
+
+<section id="posts" class="section" aria-labelledby="posts-title">
+  <h2 id="posts-title">기술 글</h2>
+  {
+    pinned.length > 0 && (
+      <div class="group">
+        <h3>대표 글</h3>
+        <ul class="list">
+          {pinned.map((p) => (
+            <li>
+              <a href={p.url}>{p.title}</a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    )
+  }
+  {
+    recent.length > 0 && (
+      <div class="group">
+        <h3>최근 글</h3>
+        <ul class="list">
+          {recent.map((p) => (
+            <li class="dated">
+              <a href={p.url}>{p.title}</a>
+              <time datetime={isoDate(p.publishedAt)}>{formatDate(p.publishedAt)}</time>
+            </li>
+          ))}
+        </ul>
+      </div>
+    )
+  }
+  <p class="all"><a href={profile.velog}>velog에서 전체 글 보기</a></p>
+</section>
+
+<style>
+  .group + .group {
+    margin-top: 2.5rem;
+  }
+
+  h3 {
+    color: var(--muted);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+  }
+
+  .list {
+    list-style: none;
+    border-top: 1px solid var(--rule);
+  }
+
+  .list > li {
+    padding-block: 0.75rem;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .list a {
+    color: var(--ink);
+    text-decoration-color: var(--rule);
+  }
+
+  .list a:hover {
+    color: var(--accent);
+    text-decoration-color: currentColor;
+  }
+
+  /* 제목이 길어도 날짜는 오른쪽에 둔다 */
+  .dated {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: baseline;
+    gap: 1.5rem;
+  }
+
+  .dated time {
+    color: var(--muted);
+    font-size: 0.9375rem;
+  }
+
+  .all {
+    margin-top: 1.5rem;
+  }
+</style>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0"><channel>
+<title>TUCG.log</title><link>https://velog.io/</link>
+<item>
+  <title><![CDATA[첫 글 & 테스트]]></title>
+  <link>https://velog.io/@lsh7315/first</link>
+  <guid>https://velog.io/@lsh7315/first</guid>
+  <pubDate>Mon, 02 Nov 2026 07:58:22 GMT</pubDate>
+  <description><![CDATA[<p>본문에 <link>가짜</link>와 </item>이 있다</p>]]></description>
+</item>
+<item>
+  <title>둘째 글 &amp; &lt;태그&gt;</title>
+  <link>https://velog.io/@lsh7315/second</link>
+  <pubDate>Sun, 01 Nov 2026 01:00:00 GMT</pubDate>
+</item>
+<item>
+  <title><![CDATA[링크 없는 글]]></title>
+  <pubDate>Sat, 31 Oct 2026 01:00:00 GMT</pubDate>
+</item>
+<item>
+  <title><![CDATA[날짜가 깨진 글]]></title>
+  <link>https://velog.io/@lsh7315/bad-date</link>
+  <pubDate>not a date</pubDate>
+</item>
+</channel></rss>

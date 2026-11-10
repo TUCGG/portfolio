@@ -47,6 +47,13 @@ test('Tab으로 이동하면 포커스 표시가 보인다', async ({page}) => {
   expect(outline).not.toBe('none');
 });
 
+test('기술 글 섹션에 대표 글이 보인다', async ({page}) => {
+  await page.goto('/');
+  for (const p of profile.pinnedPosts) {
+    await expect(page.getByRole('link', {name: p.title})).toHaveAttribute('href', p.url);
+  }
+});
+
 test('없는 주소는 404 페이지를 보여준다', async ({page}) => {
   const res = await page.goto('/no-such-page');
   expect(res?.status()).toBe(404);

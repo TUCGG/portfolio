@@ -52,7 +52,20 @@ export const profile: Profile = {
     {group: '테스트', items: ['Vitest', 'Playwright']},
     {group: '이러닝 표준', items: ['SCORM', 'xAPI', 'cmi5']}
   ],
-  pinnedPosts: [],
+  pinnedPosts: [
+    {
+      title: 'SCORM에서 xAPI, cmi5까지 - 이러닝 표준 정리와 코스 구조 XML 만들기',
+      url: 'https://velog.io/@lsh7315/SCORM%EC%97%90%EC%84%9C-xAPI-cmi5%EA%B9%8C%EC%A7%80-%EC%9D%B4%EB%9F%AC%EB%8B%9D-%ED%91%9C%EC%A4%80-%EC%A0%95%EB%A6%AC%EC%99%80-%EC%BD%94%EC%8A%A4-%EA%B5%AC%EC%A1%B0-XML-%EB%A7%8C%EB%93%A4%EA%B8%B0'
+    },
+    {
+      title: '기존 데이터를 깨지 않고 리뉴얼하기 - 역량 관리 솔루션 v2 설계 기록',
+      url: 'https://velog.io/@lsh7315/%EA%B8%B0%EC%A1%B4-%EB%8D%B0%EC%9D%B4%ED%84%B0%EB%A5%BC-%EA%B9%A8%EC%A7%80-%EC%95%8A%EA%B3%A0-%EB%A6%AC%EB%89%B4%EC%96%BC%ED%95%98%EA%B8%B0-%EC%97%AD%EB%9F%89-%EA%B4%80%EB%A6%AC-%EC%86%94%EB%A3%A8%EC%85%98-v2-%EC%84%A4%EA%B3%84-%EA%B8%B0%EB%A1%9D'
+    },
+    {
+      title: 'React 19.3 신기능 정리 - View Transitions, Fragment Refs, browser(), Trusted Types',
+      url: 'https://velog.io/@lsh7315/React-19.3-%EC%8B%A0%EA%B8%B0%EB%8A%A5-%EC%A0%95%EB%A6%AC-View-Transitions-Fragment-Refs-browser-Trusted-Types'
+    }
+  ],
   education: [],
   certificates: []
 };
