@@ -1,0 +1,23 @@
+---
+import type {CollectionEntry} from 'astro:content';
+
+import ProjectEntry from './ProjectEntry.astro';
+
+type Props = {projects: CollectionEntry<'projects'>[]};
+
+const {projects} = Astro.props;
+---
+
+<section id="projects" class="section" aria-labelledby="projects-title">
+  <h2 id="projects-title">프로젝트</h2>
+  <div class="list">
+    {projects.map((p) => <ProjectEntry project={p} />)}
+  </div>
+</section>
+
+<style>
+  .list {
+    display: grid;
+    gap: 2.5rem;
+  }
+</style>

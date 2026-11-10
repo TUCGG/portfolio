@@ -1,0 +1,58 @@
+---
+import type {CollectionEntry} from 'astro:content';
+
+import {formatPeriod} from '../lib/period.ts';
+
+type Props = {project: CollectionEntry<'projects'>};
+
+const {project} = Astro.props;
+const {title, start, end, role, summary, highlights, stack} = project.data;
+---
+
+<article class="project">
+  <div class="entry-head">
+    <h3><a href={`/projects/${project.id}/`}>{title}</a></h3>
+    <time>{formatPeriod(start, end)}</time>
+  </div>
+  <p class="muted role">{role}</p>
+  <p class="summary">{summary}</p>
+  <ul class="bullets highlights">
+    {highlights.map((h) => <li>{h}</li>)}
+  </ul>
+  <p class="muted stack">{stack.join(', ')}</p>
+</article>
+
+<style>
+  h3 {
+    font-size: 1.0625rem;
+    font-weight: 600;
+    line-height: 1.5;
+  }
+
+  h3 a {
+    color: var(--ink);
+    text-decoration-color: var(--rule);
+  }
+
+  h3 a:hover {
+    color: var(--accent);
+    text-decoration-color: currentColor;
+  }
+
+  .role {
+    font-size: 0.9375rem;
+  }
+
+  .summary {
+    margin-top: 0.5rem;
+  }
+
+  .highlights {
+    margin-top: 0.5rem;
+  }
+
+  .stack {
+    margin-top: 0.625rem;
+    font-size: 0.875rem;
+  }
+</style>

@@ -1,33 +1,52 @@
 ---
+import type {CollectionEntry} from 'astro:content';
+
+import ProjectEntry from './ProjectEntry.astro';
 import {profile} from '../data/profile.ts';
 import {formatPeriod} from '../lib/period.ts';
+
+type Props = {projects: CollectionEntry<'projects'>[]};
+
+const {projects} = Astro.props;
 ---
 
 <section id="career" class="section" aria-labelledby="career-title">
   <h2 id="career-title">경력</h2>
   {
-    profile.career.map((c) => (
-      <div class="company">
-        <div class="entry-head">
-          <h3>{c.company}</h3>
-          <time>{formatPeriod(c.start, c.end)}</time>
+    profile.career.map((c) => {
+      const own = projects.filter((p) => p.data.company === c.company);
+      return (
+        <div class="company">
+          <div class="entry-head">
+            <h3>{c.company}</h3>
+            <time>{formatPeriod(c.start, c.end)}</time>
+          </div>
+          <p class="muted">
+            {c.team}, {c.role}
+          </p>
+          <ul class="bullets achievements">
+            {c.achievements.map((a) => (
+              <li>{a}</li>
+            ))}
+          </ul>
+          {own.length > 0 && (
+            <ol class="timeline">
+              {own.map((p) => (
+                <li>
+                  <ProjectEntry project={p} />
+                </li>
+              ))}
+            </ol>
+          )}
         </div>
-        <p class="muted">
-          {c.team}, {c.role}
-        </p>
-        <ul class="bullets achievements">
-          {c.achievements.map((a) => (
-            <li>{a}</li>
-          ))}
-        </ul>
-      </div>
-    ))
+      );
+    })
   }
 </section>
 
 <style>
   .company + .company {
-    margin-top: 3rem;
+    margin-top: 3.5rem;
   }
 
   h3 {
@@ -38,5 +57,31 @@ import {formatPeriod} from '../lib/period.ts';
 
   .achievements {
     margin-top: 1rem;
+  }
+
+  /* 회사 아래 프로젝트를 시간 순서로 잇는 선 */
+  .timeline {
+    list-style: none;
+    display: grid;
+    gap: 2.25rem;
+    margin: 2rem 0 0 0.3125rem;
+    padding-left: 1.75rem;
+    border-left: 1px solid var(--rule);
+  }
+
+  .timeline > li {
+    position: relative;
+  }
+
+  .timeline > li::before {
+    content: '';
+    position: absolute;
+    left: calc(-1.75rem - 6px);
+    top: 0.5em;
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 2px solid var(--accent);
   }
 </style>

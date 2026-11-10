@@ -1,0 +1,153 @@
+---
+import {Image} from 'astro:assets';
+import {getCollection, render, type CollectionEntry} from 'astro:content';
+
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import {profile} from '../../data/profile.ts';
+import {formatPeriod} from '../../lib/period.ts';
+
+export async function getStaticPaths() {
+  const projects = await getCollection('projects');
+  return projects.map((entry) => ({params: {slug: entry.id}, props: {entry}}));
+}
+
+type Props = {entry: CollectionEntry<'projects'>};
+
+const {entry} = Astro.props;
+const {title, company, start, end, role, stack, summary, links, cover, coverAlt} = entry.data;
+const {Content} = await render(entry);
+const back = company === '개인' ? '/#projects' : '/#career';
+
+const linkRows = [
+  links.demo && {label: '데모', href: links.demo},
+  links.github && {label: '소스', href: links.github},
+  links.post && {label: '관련 글', href: links.post}
+].filter((row): row is {label: string; href: string} => Boolean(row));
+---
+
+<BaseLayout title={`${title} | ${profile.name}`} description={summary}>
+  <header class="top">
+    <a href={back}>{profile.name} 포트폴리오</a>
+  </header>
+  <main id="main">
+    <h1>{title}</h1>
+    <p class="summary">{summary}</p>
+    <dl class="meta">
+      <div><dt>회사</dt><dd>{company}</dd></div>
+      <div><dt>기간</dt><dd><time>{formatPeriod(start, end)}</time></dd></div>
+      <div><dt>역할</dt><dd>{role}</dd></div>
+      <div><dt>기술</dt><dd>{stack.join(', ')}</dd></div>
+      {
+        linkRows.length > 0 && (
+          <div>
+            <dt>링크</dt>
+            <dd class="links">
+              {linkRows.map((l) => (
+                <a href={l.href}>{l.label}</a>
+              ))}
+            </dd>
+          </div>
+        )
+      }
+    </dl>
+    {cover && <Image class="cover" src={cover} alt={coverAlt ?? ''} widths={[720, 1440]} sizes="(min-width: 760px) 720px, 100vw" />}
+    <div class="prose">
+      <Content />
+    </div>
+    <p class="back"><a href={back}>다른 프로젝트 보기</a></p>
+  </main>
+</BaseLayout>
+
+<style>
+  .top {
+    max-width: calc(var(--measure) + 2.5rem);
+    margin-inline: auto;
+    padding: 1.25rem 1.25rem 0;
+  }
+
+  .top a {
+    color: var(--muted);
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .top a:hover {
+    color: var(--ink);
+  }
+
+  main {
+    max-width: calc(var(--measure) + 2.5rem);
+    margin-inline: auto;
+    padding: 3.5rem 1.25rem 5rem;
+  }
+
+  h1 {
+    font-size: clamp(2rem, 5vw, 2.75rem);
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    line-height: 1.2;
+  }
+
+  .summary {
+    margin-top: 1rem;
+    font-size: 1.125rem;
+  }
+
+  .meta {
+    display: grid;
+    margin-top: 2rem;
+    border-top: 1px solid var(--rule);
+  }
+
+  .meta > div {
+    display: grid;
+    grid-template-columns: 4.5rem 1fr;
+    gap: 1rem;
+    padding-block: 0.625rem;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .meta dt {
+    color: var(--muted);
+  }
+
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1rem;
+  }
+
+  .cover {
+    display: block;
+    width: 100%;
+    height: auto;
+    margin-top: 2.5rem;
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+  }
+
+  .prose {
+    margin-top: 1rem;
+  }
+
+  .prose :global(h2) {
+    margin-top: 2.5rem;
+    font-size: 1.25rem;
+    font-weight: 700;
+  }
+
+  .prose :global(p),
+  .prose :global(ul),
+  .prose :global(ol) {
+    margin-top: 0.75rem;
+  }
+
+  .prose :global(ul),
+  .prose :global(ol) {
+    padding-left: 1.25rem;
+  }
+
+  .back {
+    margin-top: 4rem;
+  }
+</style>

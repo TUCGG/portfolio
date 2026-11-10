@@ -1,18 +1,25 @@
 ---
+import {getCollection} from 'astro:content';
+
 import BaseLayout from '../layouts/BaseLayout.astro';
 import About from '../components/About.astro';
 import Career from '../components/Career.astro';
 import Contact from '../components/Contact.astro';
 import Education from '../components/Education.astro';
+import Projects from '../components/Projects.astro';
 import Sidebar from '../components/Sidebar.astro';
 import Skills from '../components/Skills.astro';
 import {profile} from '../data/profile.ts';
+import {sortProjects} from '../lib/projects.ts';
 
+const projects = sortProjects(await getCollection('projects'));
+const personal = projects.filter((p) => p.data.company === '개인');
 const hasEducation = profile.education.length > 0 || profile.certificates.length > 0;
 
 const sections = [
   {id: 'about', label: '소개'},
   {id: 'career', label: '경력'},
+  ...(personal.length > 0 ? [{id: 'projects', label: '프로젝트'}] : []),
   {id: 'skills', label: '기술 스택'},
   ...(hasEducation ? [{id: 'education', label: '학력·자격'}] : []),
   {id: 'contact', label: '연락처'}
@@ -23,7 +30,8 @@ const sections = [
   <Sidebar sections={sections} />
   <main id="main">
     <About />
-    <Career />
+    <Career projects={projects} />
+    {personal.length > 0 && <Projects projects={personal} />}
     <Skills />
     <Education />
     <Contact />
